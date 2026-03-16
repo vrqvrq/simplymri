@@ -35,6 +35,9 @@ app.use('/settings', require('./routes/settings'));
 app.use('/api', require('./routes/api'));
 app.use('/export', require('./routes/export'));
 app.use('/codes', require('./routes/barcodes'));
+app.use('/physicians', require('./routes/physicians'));
+app.use('/worklist', require('./routes/worklist'));
+app.use('/panels', require('./routes/panels'));
 
 // Error handler
 app.use((err, req, res, next) => {

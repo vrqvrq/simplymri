@@ -47,6 +47,35 @@ router.post('/save/:orderId', requireAuth, (req, res) => {
           status = 'completed', performed_by = ?, performed_at = datetime('now')
         WHERE id = ?
       `).run(data.value, isNaN(numericValue) ? null : numericValue, flag, data.notes || null, req.session.user.id, resultId);
+
+      // Check for critical values
+      if (!isNaN(numericValue) && result) {
+        const critical = db.prepare('SELECT * FROM critical_values WHERE test_id = ?').get(result.test_id);
+        if (critical) {
+          let criticalType = null;
+          if (critical.critical_low !== null && numericValue <= critical.critical_low) criticalType = 'CRITICAL LOW';
+          else if (critical.critical_high !== null && numericValue >= critical.critical_high) criticalType = 'CRITICAL HIGH';
+
+          if (criticalType) {
+            const order = db.prepare('SELECT patient_id FROM lab_orders WHERE id = ?').get(req.params.orderId);
+            const test = db.prepare('SELECT name FROM test_catalog WHERE id = ?').get(result.test_id);
+            db.prepare(`
+              INSERT INTO critical_alerts (result_id, order_id, patient_id, test_name, result_value, critical_type)
+              VALUES (?, ?, ?, ?, ?, ?)
+            `).run(resultId, req.params.orderId, order.patient_id, test.name, data.value, criticalType);
+
+            // Create in-app notification for all users
+            db.prepare(`
+              INSERT INTO notifications (user_id, type, title, message, link)
+              VALUES (NULL, 'critical', ?, ?, ?)
+            `).run(
+              'CRITICAL: ' + test.name,
+              `${criticalType} - Value: ${data.value} (${critical.action_required})`,
+              '/orders/' + req.params.orderId
+            );
+          }
+        }
+      }
     }
 
     // Check if all results for this order are completed

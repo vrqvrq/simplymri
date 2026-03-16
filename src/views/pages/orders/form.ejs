@@ -10,7 +10,7 @@
     <div class="alert alert-error"><%= error %></div>
   <% } %>
 
-  <form method="POST" action="/orders">
+  <form method="POST" action="/orders" id="order-form">
     <div class="form-row">
       <div class="form-group">
         <label>Patient *</label>
@@ -23,7 +23,10 @@
       </div>
       <div class="form-group">
         <label>Ordering Physician</label>
-        <input type="text" name="ordering_physician" value="<%= order ? order.ordering_physician || '' : '' %>">
+        <div class="autocomplete-wrapper">
+          <input type="text" name="ordering_physician" id="physician-input" value="<%= order ? order.ordering_physician || '' : '' %>" placeholder="Start typing physician name..." autocomplete="off">
+          <div id="physician-results" class="autocomplete-results"></div>
+        </div>
       </div>
     </div>
     <div class="form-row">
@@ -41,7 +44,13 @@
       <textarea name="clinical_notes" rows="2"><%= order ? order.clinical_notes || '' : '' %></textarea>
     </div>
 
-    <h3>Select Tests *</h3>
+    <!-- Test Panels -->
+    <h3>Quick Panels</h3>
+    <div id="panels-container" class="test-catalog" style="margin-bottom:16px">
+      <div style="color:var(--text-muted);font-size:13px">Loading panels...</div>
+    </div>
+
+    <h3>Individual Tests *</h3>
     <div class="test-catalog">
       <% let currentCat = ''; %>
       <% tests.forEach(function(t) { %>
@@ -49,15 +58,96 @@
           <h4 class="test-category"><%= currentCat %></h4>
         <% } %>
         <label class="test-option">
-          <input type="checkbox" name="test_ids" value="<%= t.id %>">
+          <input type="checkbox" name="test_ids" value="<%= t.id %>" data-code="<%= t.code %>">
           <span class="test-name"><%= t.name %> (<%= t.code %>)</span>
           <span class="test-price">$<%= t.price.toFixed(2) %></span>
         </label>
       <% }); %>
     </div>
 
+    <div style="display:flex;align-items:center;gap:16px;margin:16px 0">
+      <strong>Estimated Total: $<span id="order-total">0.00</span></strong>
+    </div>
+
     <button type="submit" class="btn btn-primary">Create Order</button>
   </form>
 </div>
+
+<script>
+// Load panels
+fetch('/panels/api/list')
+  .then(function(r) { return r.json(); })
+  .then(function(panels) {
+    var container = document.getElementById('panels-container');
+    if (panels.length === 0) { container.innerHTML = '<div style="color:var(--text-muted);font-size:13px">No panels configured</div>'; return; }
+    container.innerHTML = panels.map(function(p) {
+      return '<label class="test-option" style="background:var(--primary-bg);border-radius:8px;padding:10px 14px">'
+        + '<input type="checkbox" class="panel-checkbox" data-tests="' + p.tests.map(function(t) { return t.code; }).join(',') + '">'
+        + '<span class="test-name"><strong>' + p.name + '</strong> (' + p.tests.map(function(t) { return t.code; }).join(', ') + ')</span>'
+        + '<span class="test-price">' + (p.price ? '$' + p.price.toFixed(2) : '') + '</span>'
+        + '</label>';
+    }).join('');
+
+    // Panel checkbox logic - select all tests in panel
+    document.querySelectorAll('.panel-checkbox').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var codes = this.dataset.tests.split(',');
+        codes.forEach(function(code) {
+          var testCb = document.querySelector('input[name="test_ids"][data-code="' + code + '"]');
+          if (testCb) testCb.checked = cb.checked;
+        });
+        updateTotal();
+      });
+    });
+  });
+
+// Physician autocomplete
+var physInput = document.getElementById('physician-input');
+var physResults = document.getElementById('physician-results');
+var physTimeout;
+if (physInput) {
+  physInput.addEventListener('input', function() {
+    clearTimeout(physTimeout);
+    var q = this.value.trim();
+    if (q.length < 1) { physResults.classList.remove('active'); return; }
+    physTimeout = setTimeout(function() {
+      fetch('/physicians/api/search?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(docs) {
+          if (docs.length === 0) { physResults.classList.remove('active'); return; }
+          physResults.innerHTML = docs.map(function(d) {
+            return '<div class="autocomplete-item" data-name="' + d.name + '">'
+              + d.name + '<small>' + (d.specialty || '') + ' - ' + (d.clinic || '') + '</small></div>';
+          }).join('');
+          physResults.classList.add('active');
+        });
+    }, 200);
+  });
+  physResults.addEventListener('click', function(e) {
+    var item = e.target.closest('.autocomplete-item');
+    if (item) {
+      physInput.value = item.dataset.name;
+      physResults.classList.remove('active');
+    }
+  });
+}
+
+// Calculate total
+function updateTotal() {
+  var total = 0;
+  document.querySelectorAll('input[name="test_ids"]:checked').forEach(function(cb) {
+    var priceEl = cb.closest('.test-option').querySelector('.test-price');
+    if (priceEl) {
+      var price = parseFloat(priceEl.textContent.replace('$', ''));
+      if (!isNaN(price)) total += price;
+    }
+  });
+  document.getElementById('order-total').textContent = total.toFixed(2);
+}
+
+document.querySelectorAll('input[name="test_ids"]').forEach(function(cb) {
+  cb.addEventListener('change', updateTotal);
+});
+</script>
 
 <%- include('../../partials/footer') %>

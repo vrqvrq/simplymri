@@ -2,7 +2,7 @@
 
 <div class="page-header">
   <h1><%= patient.first_name %> <%= patient.last_name %></h1>
-  <div>
+  <div class="page-header-actions">
     <a href="/orders/new?patient_id=<%= patient.id %>" class="btn btn-primary">+ New Order</a>
     <a href="/patients/<%= patient.id %>/edit" class="btn btn-outline">Edit</a>
   </div>
@@ -25,6 +25,30 @@
     <h3>Emergency Contact</h3>
     <div class="detail-row"><strong>Name:</strong> <%= patient.emergency_contact || '-' %></div>
     <div class="detail-row"><strong>Phone:</strong> <%= patient.emergency_phone || '-' %></div>
+  </div>
+</div>
+
+<!-- Result History Graph -->
+<div class="card">
+  <h2>Result Trends</h2>
+  <div style="margin-bottom:12px">
+    <select id="history-test-select" class="input-sm" style="width:auto;padding:8px 12px">
+      <option value="">Select a test to chart...</option>
+    </select>
+  </div>
+  <div id="history-chart-container" style="display:none">
+    <canvas id="chart-patient-history" height="200"></canvas>
+  </div>
+  <div id="history-empty" style="color:var(--text-muted);text-align:center;padding:20px">
+    Select a test above to see trends over time
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="card">
+  <h2>Patient Timeline</h2>
+  <div id="patient-timeline" class="timeline">
+    <div class="text-center" style="padding:20px;color:var(--text-muted)">Loading timeline...</div>
   </div>
 </div>
 
@@ -73,5 +97,114 @@
     </tbody>
   </table>
 </div>
+
+<script>
+var patientId = '<%= patient.id %>';
+var historyChart = null;
+
+// Load available tests for history
+fetch('/api/patients/' + patientId + '/history')
+  .then(function(r) { return r.json(); })
+  .then(function(tests) {
+    var select = document.getElementById('history-test-select');
+    tests.forEach(function(t) {
+      var opt = document.createElement('option');
+      opt.value = t.code;
+      opt.textContent = t.test_name + ' (' + t.code + ')';
+      select.appendChild(opt);
+    });
+  });
+
+document.getElementById('history-test-select').addEventListener('change', function() {
+  var code = this.value;
+  if (!code) {
+    document.getElementById('history-chart-container').style.display = 'none';
+    document.getElementById('history-empty').style.display = 'block';
+    return;
+  }
+
+  fetch('/api/patients/' + patientId + '/history?test=' + code)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.length === 0) return;
+      document.getElementById('history-chart-container').style.display = 'block';
+      document.getElementById('history-empty').style.display = 'none';
+
+      if (historyChart) historyChart.destroy();
+
+      var ctx = document.getElementById('chart-patient-history');
+      var datasets = [{
+        label: data[0].test_name,
+        data: data.map(function(d) { return d.result_numeric; }),
+        borderColor: '#4f46e5',
+        backgroundColor: 'rgba(79,70,229,0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointBackgroundColor: data.map(function(d) {
+          return d.flag === 'HIGH' ? '#ef4444' : d.flag === 'LOW' ? '#f59e0b' : '#10b981';
+        })
+      }];
+
+      // Add reference range lines
+      if (data[0].reference_range_min !== null) {
+        datasets.push({
+          label: 'Low Limit',
+          data: data.map(function() { return data[0].reference_range_min; }),
+          borderColor: 'rgba(245,158,11,0.4)',
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false
+        });
+      }
+      if (data[0].reference_range_max !== null) {
+        datasets.push({
+          label: 'High Limit',
+          data: data.map(function() { return data[0].reference_range_max; }),
+          borderColor: 'rgba(239,68,68,0.4)',
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false
+        });
+      }
+
+      historyChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(function(d) { return d.performed_at ? d.performed_at.slice(0, 10) : ''; }),
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } },
+          scales: { y: { title: { display: true, text: data[0].unit || '' } } }
+        }
+      });
+    });
+});
+
+// Load timeline
+fetch('/api/patients/' + patientId + '/timeline')
+  .then(function(r) { return r.json(); })
+  .then(function(events) {
+    var container = document.getElementById('patient-timeline');
+    if (events.length === 0) {
+      container.innerHTML = '<div class="text-center" style="padding:20px;color:var(--text-muted)">No activity yet</div>';
+      return;
+    }
+    container.innerHTML = events.map(function(e) {
+      var icon = e.type === 'order' ? 'O' : e.type === 'result' ? 'R' : '$';
+      var badge = e.status ? '<span class="badge badge-' + e.status + '">' + e.status + '</span>' : '';
+      var link = e.type === 'order' ? '/orders/' + e.id : e.type === 'invoice' ? '/billing/' + e.id : e.order_id ? '/orders/' + e.order_id : '#';
+      return '<div class="timeline-item">'
+        + '<div class="timeline-icon timeline-icon-' + e.type + '">' + icon + '</div>'
+        + '<div class="timeline-content">'
+        + '<div class="timeline-title"><a href="' + link + '">' + e.title + '</a> ' + badge + '</div>'
+        + '<div class="timeline-date">' + (e.date || '') + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  });
+</script>
 
 <%- include('../../partials/footer') %>

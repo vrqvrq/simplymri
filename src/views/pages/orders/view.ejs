@@ -2,7 +2,7 @@
 
 <div class="page-header">
   <h1>Order <%= order.order_number %></h1>
-  <div>
+  <div class="page-header-actions">
     <% if (order.status === 'pending' || order.status === 'in_progress') { %>
       <a href="/results/enter/<%= order.id %>" class="btn btn-primary">Enter Results</a>
     <% } %>
@@ -47,20 +47,22 @@
   <h2>Samples</h2>
   <table class="table">
     <thead>
-      <tr><th>Sample ID</th><th>Type</th><th>Collected</th><th>Status</th><th>Actions</th></tr>
+      <tr><th>Sample ID</th><th>Barcode</th><th>Type</th><th>Collected</th><th>Status</th><th>Actions</th></tr>
     </thead>
     <tbody>
       <% samples.forEach(function(s) { %>
         <tr>
           <td><strong><%= s.sample_id %></strong></td>
+          <td><img src="/codes/barcode/<%= s.sample_id %>" alt="barcode" height="25"></td>
           <td><%= s.sample_type %></td>
           <td><%= s.collection_date %></td>
           <td><span class="badge badge-<%= s.status %>"><%= s.status %></span></td>
           <td>
+            <a href="/codes/label/<%= s.sample_id %>" class="btn btn-sm btn-outline" target="_blank">Label</a>
             <% if (s.status === 'collected') { %>
               <form method="POST" action="/samples/<%= s.id %>/status" style="display:inline">
                 <input type="hidden" name="status" value="processing">
-                <button type="submit" class="btn btn-sm">Start Processing</button>
+                <button type="submit" class="btn btn-sm">Process</button>
               </form>
             <% } %>
           </td>
@@ -74,7 +76,7 @@
   <h2>Test Results</h2>
   <table class="table">
     <thead>
-      <tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference Range</th><th>Flag</th><th>Status</th></tr>
+      <tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference Range</th><th>Flag</th><th>Status</th><th>Actions</th></tr>
     </thead>
     <tbody>
       <% results.forEach(function(r) { %>
@@ -89,10 +91,69 @@
             <% } %>
           </td>
           <td><span class="badge badge-<%= r.status %>"><%= r.status %></span></td>
+          <td>
+            <% if (r.result_value && (r.status === 'completed' || r.status === 'verified')) { %>
+              <button class="btn btn-sm btn-outline" onclick="openAmend('<%= r.id %>', '<%= r.result_value %>')">Amend</button>
+            <% } %>
+          </td>
         </tr>
       <% }); %>
     </tbody>
   </table>
 </div>
+
+<!-- Amendment Modal -->
+<div class="modal-overlay" id="amend-modal" style="display:none">
+  <div class="modal">
+    <h3>Amend Result</h3>
+    <div class="form-group">
+      <label>Current Value</label>
+      <input type="text" id="amend-current" disabled>
+    </div>
+    <div class="form-group">
+      <label>New Value *</label>
+      <input type="text" id="amend-new-value" required>
+    </div>
+    <div class="form-group">
+      <label>Reason for Amendment *</label>
+      <textarea id="amend-reason" rows="3" required placeholder="Explain why this result is being amended..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="submitAmend()">Save Amendment</button>
+      <button class="btn btn-outline" onclick="closeAmend()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var amendResultId = null;
+
+function openAmend(id, currentValue) {
+  amendResultId = id;
+  document.getElementById('amend-current').value = currentValue;
+  document.getElementById('amend-new-value').value = '';
+  document.getElementById('amend-reason').value = '';
+  document.getElementById('amend-modal').style.display = 'flex';
+}
+
+function closeAmend() {
+  document.getElementById('amend-modal').style.display = 'none';
+}
+
+function submitAmend() {
+  var newValue = document.getElementById('amend-new-value').value.trim();
+  var reason = document.getElementById('amend-reason').value.trim();
+  if (!newValue || !reason) { alert('Both fields are required'); return; }
+
+  fetch('/api/results/' + amendResultId + '/amend', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ new_value: newValue, reason: reason })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() { window.location.reload(); })
+  .catch(function(err) { alert('Error: ' + err.message); });
+}
+</script>
 
 <%- include('../../partials/footer') %>

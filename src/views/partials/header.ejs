@@ -21,8 +21,10 @@
         <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
         <li><a href="/patients" class="nav-link">Patients</a></li>
         <li><a href="/orders" class="nav-link">Lab Orders</a></li>
+        <li><a href="/worklist" class="nav-link">Worklist</a></li>
         <li><a href="/samples" class="nav-link">Samples</a></li>
         <li><a href="/billing" class="nav-link">Billing</a></li>
+        <li><a href="/physicians" class="nav-link">Physicians</a></li>
         <li><a href="/settings" class="nav-link">Settings</a></li>
       </ul>
       <div class="sidebar-footer">
@@ -35,3 +37,22 @@
       </div>
     </nav>
     <main class="content">
+      <!-- Notification Bell -->
+      <div class="topbar">
+        <div class="keyboard-hint">Press <kbd>?</kbd> for shortcuts</div>
+        <div class="notification-bell" id="notification-bell">
+          <button class="bell-btn" onclick="toggleNotifications()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <span class="bell-count" id="bell-count" style="display:none">0</span>
+          </button>
+          <div class="notification-dropdown" id="notification-dropdown">
+            <div class="notification-header">
+              <strong>Notifications</strong>
+              <button class="btn btn-sm" onclick="markAllRead()">Mark all read</button>
+            </div>
+            <div class="notification-list" id="notification-list">
+              <div class="text-center" style="padding:20px;color:var(--text-muted)">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </div>

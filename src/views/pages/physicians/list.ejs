@@ -1,0 +1,47 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Referring Physicians</h1>
+  <a href="/physicians/new" class="btn btn-primary">+ Add Physician</a>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Specialty</th>
+        <th>Clinic</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>License #</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% physicians.forEach(function(p) { %>
+        <tr>
+          <td><strong><%= p.name %></strong></td>
+          <td><%= p.specialty || '-' %></td>
+          <td><%= p.clinic || '-' %></td>
+          <td><%= p.phone || '-' %></td>
+          <td><%= p.email || '-' %></td>
+          <td><%= p.license_number || '-' %></td>
+          <td><span class="badge badge-<%= p.active ? 'completed' : 'stat' %>"><%= p.active ? 'Active' : 'Inactive' %></span></td>
+          <td>
+            <a href="/physicians/<%= p.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+            <form method="POST" action="/physicians/<%= p.id %>/toggle" style="display:inline">
+              <button type="submit" class="btn btn-sm"><%= p.active ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (physicians.length === 0) { %>
+        <tr><td colspan="8" class="text-center">No physicians added yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>

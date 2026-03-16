@@ -173,6 +173,94 @@ db.exec(`
     smtp_from TEXT DEFAULT '',
     enabled INTEGER DEFAULT 0
   );
+
+  -- Test panels (groups of tests)
+  CREATE TABLE IF NOT EXISTS test_panels (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    price REAL,
+    active INTEGER DEFAULT 1
+  );
+
+  -- Panel-test mapping
+  CREATE TABLE IF NOT EXISTS panel_tests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    panel_id INTEGER NOT NULL,
+    test_id INTEGER NOT NULL,
+    FOREIGN KEY (panel_id) REFERENCES test_panels(id),
+    FOREIGN KEY (test_id) REFERENCES test_catalog(id),
+    UNIQUE(panel_id, test_id)
+  );
+
+  -- Critical value thresholds
+  CREATE TABLE IF NOT EXISTS critical_values (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    test_id INTEGER NOT NULL,
+    critical_low REAL,
+    critical_high REAL,
+    action_required TEXT DEFAULT 'Notify physician immediately',
+    FOREIGN KEY (test_id) REFERENCES test_catalog(id)
+  );
+
+  -- Critical value alerts
+  CREATE TABLE IF NOT EXISTS critical_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    result_id INTEGER NOT NULL,
+    order_id INTEGER NOT NULL,
+    patient_id INTEGER NOT NULL,
+    test_name TEXT NOT NULL,
+    result_value TEXT NOT NULL,
+    critical_type TEXT NOT NULL,
+    acknowledged INTEGER DEFAULT 0,
+    acknowledged_by INTEGER,
+    acknowledged_at TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (result_id) REFERENCES test_results(id),
+    FOREIGN KEY (order_id) REFERENCES lab_orders(id),
+    FOREIGN KEY (patient_id) REFERENCES patients(id)
+  );
+
+  -- Result amendments
+  CREATE TABLE IF NOT EXISTS result_amendments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    result_id INTEGER NOT NULL,
+    previous_value TEXT,
+    new_value TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    amended_by INTEGER NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (result_id) REFERENCES test_results(id),
+    FOREIGN KEY (amended_by) REFERENCES users(id)
+  );
+
+  -- Referring physicians
+  CREATE TABLE IF NOT EXISTS physicians (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    specialty TEXT,
+    clinic TEXT,
+    phone TEXT,
+    email TEXT,
+    license_number TEXT,
+    notes TEXT,
+    active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  -- In-app notifications
+  CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    message TEXT,
+    link TEXT,
+    read INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 `);
 
 // Seed default admin user
@@ -225,6 +313,61 @@ const insertTests = db.transaction(() => {
   }
 });
 insertTests();
+
+// Seed test panels
+const insertPanel = db.prepare('INSERT OR IGNORE INTO test_panels (code, name, description, price) VALUES (?, ?, ?, ?)');
+const insertPanelTest = db.prepare('INSERT OR IGNORE INTO panel_tests (panel_id, test_id) VALUES (?, ?)');
+const getTestByCode = db.prepare('SELECT id FROM test_catalog WHERE code = ?');
+
+const panels = [
+  { code: 'LIVER', name: 'Liver Panel', desc: 'ALT, AST, Bilirubin', price: 25.00, tests: ['ALT', 'AST'] },
+  { code: 'LIPID', name: 'Lipid Panel', desc: 'Total cholesterol, triglycerides', price: 25.00, tests: ['CHOL', 'TRIG'] },
+  { code: 'RENAL', name: 'Renal Panel', desc: 'BUN, creatinine, uric acid', price: 30.00, tests: ['BUN', 'CREAT', 'UA'] },
+  { code: 'DIAB', name: 'Diabetes Panel', desc: 'Fasting glucose, HbA1c', price: 35.00, tests: ['GLU', 'HBA1C'] },
+  { code: 'THYROID', name: 'Thyroid Panel', desc: 'TSH', price: 25.00, tests: ['TSH'] },
+  { code: 'CBC-FULL', name: 'CBC Full Panel', desc: 'WBC, RBC, Hemoglobin, Hematocrit, Platelets', price: 35.00, tests: ['WBC', 'RBC', 'HGB', 'HCT', 'PLT'] },
+  { code: 'INFLAM', name: 'Inflammation Panel', desc: 'CRP, ESR', price: 25.00, tests: ['CRP', 'ESR'] },
+];
+
+const seedPanels = db.transaction(() => {
+  for (const panel of panels) {
+    insertPanel.run(panel.code, panel.name, panel.desc, panel.price);
+    const p = db.prepare('SELECT id FROM test_panels WHERE code = ?').get(panel.code);
+    if (p) {
+      for (const testCode of panel.tests) {
+        const t = getTestByCode.get(testCode);
+        if (t) insertPanelTest.run(p.id, t.id);
+      }
+    }
+  }
+});
+seedPanels();
+
+// Seed critical values
+const insertCritical = db.prepare('INSERT OR IGNORE INTO critical_values (test_id, critical_low, critical_high, action_required) VALUES (?, ?, ?, ?)');
+const criticals = [
+  ['GLU', 40, 500, 'Notify physician immediately - critical glucose'],
+  ['WBC', 2.0, 30.0, 'Notify physician immediately - critical WBC'],
+  ['HGB', 5.0, 20.0, 'Notify physician immediately - critical hemoglobin'],
+  ['PLT', 20, 1000, 'Notify physician immediately - critical platelet count'],
+  ['CREAT', null, 10.0, 'Notify physician immediately - critical creatinine'],
+  ['ALT', null, 1000, 'Notify physician immediately - critical liver enzyme'],
+  ['TSH', 0.01, 100, 'Notify physician immediately - critical TSH'],
+];
+
+const seedCriticals = db.transaction(() => {
+  for (const [code, low, high, action] of criticals) {
+    const t = getTestByCode.get(code);
+    if (t) insertCritical.run(t.id, low, high, action);
+  }
+});
+seedCriticals();
+
+// Seed sample referring physicians
+const insertPhysician = db.prepare('INSERT OR IGNORE INTO physicians (name, specialty, clinic, phone, email, license_number) VALUES (?, ?, ?, ?, ?, ?)');
+insertPhysician.run('Dr. Sarah Johnson', 'Internal Medicine', 'City Medical Center', '555-0101', 'sjohnson@citymed.com', 'MD-12345');
+insertPhysician.run('Dr. Michael Chen', 'Family Medicine', 'Westside Family Clinic', '555-0102', 'mchen@westside.com', 'MD-12346');
+insertPhysician.run('Dr. Emily Rodriguez', 'Endocrinology', 'Metro Diabetes Center', '555-0103', 'erodriguez@metrodiab.com', 'MD-12347');
 
 console.log('Database setup complete!');
 console.log('Default admin credentials: admin / admin123');

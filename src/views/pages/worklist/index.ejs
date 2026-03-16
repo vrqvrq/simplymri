@@ -1,0 +1,101 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Worklist</h1>
+  <div class="page-header-actions">
+    <a href="/worklist?filter=all" class="btn btn-sm <%= filter === 'all' ? 'btn-primary' : 'btn-outline' %>">All Pending</a>
+    <a href="/worklist?filter=mine" class="btn btn-sm <%= filter === 'mine' ? 'btn-primary' : 'btn-outline' %>">My Work</a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Pending Results (<%= pendingResults.length %>)</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Patient</th>
+        <th>Sample</th>
+        <th>Test</th>
+        <th>Priority</th>
+        <th>Elapsed</th>
+        <th>Target TAT</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% pendingResults.forEach(function(r) { %>
+        <tr class="<%= r.hours_elapsed > r.turnaround_hours ? 'row-abnormal' : '' %>">
+          <td><a href="/orders/<%= r.order_id %>"><%= r.order_number %></a></td>
+          <td><%= r.first_name %> <%= r.last_name %></td>
+          <td><%= r.sample_id %></td>
+          <td><strong><%= r.code %></strong> - <%= r.test_name %></td>
+          <td><span class="badge badge-<%= r.priority %>"><%= r.priority %></span></td>
+          <td><%= r.hours_elapsed %>h</td>
+          <td><%= r.turnaround_hours %>h</td>
+          <td><a href="/results/enter/<%= r.order_id %>" class="btn btn-sm btn-primary">Enter</a></td>
+        </tr>
+      <% }); %>
+      <% if (pendingResults.length === 0) { %>
+        <tr><td colspan="8" class="text-center">No pending work</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Awaiting Verification (<%= pendingVerification.length %>)</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Order</th><th>Patient</th><th>Test</th><th>Result</th><th>Flag</th><th>Performed By</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% pendingVerification.forEach(function(r) { %>
+        <tr>
+          <td><a href="/orders/<%= r.order_id %>"><%= r.order_number %></a></td>
+          <td><%= r.first_name %> <%= r.last_name %></td>
+          <td><%= r.code %> - <%= r.test_name %></td>
+          <td><%= r.result_value || '-' %></td>
+          <td><% if (r.flag) { %><span class="badge badge-<%= r.flag === 'NORMAL' ? 'completed' : 'stat' %>"><%= r.flag %></span><% } %></td>
+          <td><%= r.performed_by_name || '-' %></td>
+          <td><a href="/orders/<%= r.order_id %>" class="btn btn-sm">Review</a></td>
+        </tr>
+      <% }); %>
+      <% if (pendingVerification.length === 0) { %>
+        <tr><td colspan="7" class="text-center">Nothing to verify</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<% if (tatStats.length > 0) { %>
+<div class="card">
+  <h2>Turnaround Time Performance</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Test</th><th>Target (h)</th><th>Avg TAT (h)</th><th>Tests Done</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <% tatStats.forEach(function(t) { %>
+        <tr>
+          <td><strong><%= t.name %></strong></td>
+          <td><%= t.target %></td>
+          <td><%= t.avg_tat || '-' %></td>
+          <td><%= t.count %></td>
+          <td>
+            <% if (t.avg_tat && t.avg_tat <= t.target) { %>
+              <span class="badge badge-completed">On Target</span>
+            <% } else if (t.avg_tat) { %>
+              <span class="badge badge-stat">Over Target</span>
+            <% } else { %>
+              -
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<% } %>
+
+<%- include('../../partials/footer') %>

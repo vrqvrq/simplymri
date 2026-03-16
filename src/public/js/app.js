@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', function() {
   initAutocomplete();
   initBulkSelect();
   initToasts();
+  initNotifications();
+  initKeyboardShortcuts();
 });
 
 // ===== NAV HIGHLIGHT =====
@@ -353,4 +355,138 @@ function showToast(message, type) {
     toast.style.transition = '0.3s ease-out';
     setTimeout(function() { toast.remove(); }, 300);
   }, 4000);
+}
+
+// ===== NOTIFICATIONS =====
+function initNotifications() {
+  var bell = document.getElementById('notification-bell');
+  if (!bell) return;
+
+  loadNotifications();
+  // Poll every 30 seconds
+  setInterval(loadNotifications, 30000);
+}
+
+function loadNotifications() {
+  fetch('/api/notifications')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var countEl = document.getElementById('bell-count');
+      var listEl = document.getElementById('notification-list');
+
+      if (data.unread > 0) {
+        countEl.textContent = data.unread;
+        countEl.style.display = 'block';
+      } else {
+        countEl.style.display = 'none';
+      }
+
+      if (data.notifications.length === 0) {
+        listEl.innerHTML = '<div class="text-center" style="padding:20px;color:var(--text-muted)">No notifications</div>';
+        return;
+      }
+
+      listEl.innerHTML = data.notifications.map(function(n) {
+        var cls = 'notification-item' + (n.read ? '' : ' unread') + (n.type === 'critical' ? ' critical' : '');
+        return '<div class="' + cls + '" data-id="' + n.id + '" data-link="' + (n.link || '#') + '">'
+          + '<div class="notif-title">' + n.title + '</div>'
+          + '<div class="notif-message">' + (n.message || '') + '</div>'
+          + '<div class="notif-time">' + n.created_at + '</div>'
+          + '</div>';
+      }).join('');
+
+      listEl.querySelectorAll('.notification-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          fetch('/api/notifications/' + item.dataset.id + '/read', { method: 'POST' });
+          if (item.dataset.link && item.dataset.link !== '#') {
+            window.location.href = item.dataset.link;
+          }
+        });
+      });
+    })
+    .catch(function() {});
+}
+
+function toggleNotifications() {
+  var dropdown = document.getElementById('notification-dropdown');
+  dropdown.classList.toggle('active');
+}
+
+function markAllRead() {
+  fetch('/api/notifications/read-all', { method: 'POST' })
+    .then(function() { loadNotifications(); });
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.notification-bell')) {
+    var dropdown = document.getElementById('notification-dropdown');
+    if (dropdown) dropdown.classList.remove('active');
+  }
+});
+
+// ===== KEYBOARD SHORTCUTS =====
+function initKeyboardShortcuts() {
+  // Add shortcuts modal to page
+  var modal = document.createElement('div');
+  modal.className = 'shortcuts-modal';
+  modal.id = 'shortcuts-modal';
+  modal.innerHTML = '<div class="shortcuts-card">'
+    + '<h3>Keyboard Shortcuts</h3>'
+    + '<div class="shortcut-row"><span>Go to Dashboard</span><kbd>g</kbd> <kbd>d</kbd></div>'
+    + '<div class="shortcut-row"><span>Go to Patients</span><kbd>g</kbd> <kbd>p</kbd></div>'
+    + '<div class="shortcut-row"><span>Go to Lab Orders</span><kbd>g</kbd> <kbd>o</kbd></div>'
+    + '<div class="shortcut-row"><span>Go to Worklist</span><kbd>g</kbd> <kbd>w</kbd></div>'
+    + '<div class="shortcut-row"><span>Go to Samples</span><kbd>g</kbd> <kbd>s</kbd></div>'
+    + '<div class="shortcut-row"><span>Go to Billing</span><kbd>g</kbd> <kbd>b</kbd></div>'
+    + '<div class="shortcut-row"><span>New Order</span><kbd>n</kbd> <kbd>o</kbd></div>'
+    + '<div class="shortcut-row"><span>New Patient</span><kbd>n</kbd> <kbd>p</kbd></div>'
+    + '<div class="shortcut-row"><span>Toggle Dark Mode</span><kbd>t</kbd> <kbd>d</kbd></div>'
+    + '<div class="shortcut-row"><span>Show Shortcuts</span><kbd>?</kbd></div>'
+    + '<div style="margin-top:16px;text-align:right"><button class="btn btn-outline" onclick="document.getElementById(\'shortcuts-modal\').classList.remove(\'active\')">Close</button></div>'
+    + '</div>';
+  document.body.appendChild(modal);
+
+  var keys = [];
+  var keyTimer;
+
+  document.addEventListener('keydown', function(e) {
+    // Ignore when typing in inputs
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+    // Escape closes modals
+    if (e.key === 'Escape') {
+      document.getElementById('shortcuts-modal').classList.remove('active');
+      var amendModal = document.getElementById('amend-modal');
+      if (amendModal) amendModal.style.display = 'none';
+      return;
+    }
+
+    keys.push(e.key);
+    clearTimeout(keyTimer);
+    keyTimer = setTimeout(function() { keys = []; }, 500);
+
+    var combo = keys.join('');
+
+    switch (combo) {
+      case '?': document.getElementById('shortcuts-modal').classList.add('active'); break;
+      case 'gd': window.location.href = '/dashboard'; break;
+      case 'gp': window.location.href = '/patients'; break;
+      case 'go': window.location.href = '/orders'; break;
+      case 'gw': window.location.href = '/worklist'; break;
+      case 'gs': window.location.href = '/samples'; break;
+      case 'gb': window.location.href = '/billing'; break;
+      case 'no': window.location.href = '/orders/new'; break;
+      case 'np': window.location.href = '/patients/new'; break;
+      case 'td':
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateToggleText();
+        break;
+    }
+
+    if (combo.length >= 2) keys = [];
+  });
 }
