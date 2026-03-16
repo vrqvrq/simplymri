@@ -30,7 +30,7 @@ router.get('/lab-report/:orderId', requireAuth, (req, res) => {
   doc.pipe(res);
 
   // Header
-  doc.fontSize(20).font('Helvetica-Bold').text('SimplyMRI Laboratory', { align: 'center' });
+  doc.fontSize(20).font('Helvetica-Bold').text('SimplyDiagnostic Laboratory', { align: 'center' });
   doc.fontSize(10).font('Helvetica').text('Clinical Laboratory Report', { align: 'center' });
   doc.moveDown();
   doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
@@ -128,7 +128,7 @@ router.get('/invoice/:invoiceId', requireAuth, (req, res) => {
   doc.pipe(res);
 
   // Header
-  doc.fontSize(20).font('Helvetica-Bold').text('SimplyMRI Laboratory', { align: 'center' });
+  doc.fontSize(20).font('Helvetica-Bold').text('SimplyDiagnostic Laboratory', { align: 'center' });
   doc.fontSize(10).font('Helvetica').text('INVOICE', { align: 'center' });
   doc.moveDown();
   doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
@@ -182,7 +182,7 @@ router.get('/invoice/:invoiceId', requireAuth, (req, res) => {
   doc.fontSize(14).text(`Total: $${invoice.total.toFixed(2)}`, { align: 'right' });
 
   doc.moveDown(2);
-  doc.fontSize(8).font('Helvetica').text('Thank you for choosing SimplyMRI Laboratory.', { align: 'center' });
+  doc.fontSize(8).font('Helvetica').text('Thank you for choosing SimplyDiagnostic Laboratory.', { align: 'center' });
 
   doc.end();
 });

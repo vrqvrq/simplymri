@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'simplymri-lis-secret-key-change-in-production',
+  secret: process.env.SESSION_SECRET || 'simplydiagnostic-lis-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 8 * 60 * 60 * 1000 } // 8 hours
@@ -38,5 +38,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`SimplyMRI LIS running at http://localhost:${PORT}`);
+  console.log(`SimplyDiagnostic LIS running at http://localhost:${PORT}`);
 });

@@ -1,5 +1,5 @@
 {
-  "name": "simplymri-lis",
+  "name": "simplydiagnostic-lis",
   "version": "1.0.0",
   "description": "Clinical Laboratory Information System",
   "main": "src/server.js",

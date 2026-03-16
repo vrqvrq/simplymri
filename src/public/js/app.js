@@ -1,4 +1,4 @@
-// SimplyMRI LIS - Client-side JavaScript
+// SimplyDiagnostic LIS - Client-side JavaScript
 
 // Highlight active nav link
 document.addEventListener('DOMContentLoaded', function() {
