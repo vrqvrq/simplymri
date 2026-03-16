@@ -157,4 +157,20 @@ router.get('/profile', requirePatient, (req, res) => {
   res.render('pages/portal/profile', { patient });
 });
 
+// Education
+router.get('/education', requirePatient, (req, res) => {
+  // Fetch unique test categories and tests the patient has had
+  const patientTests = db.prepare(`
+    SELECT DISTINCT tc.code, tc.name as test_name, tc.category, tc.unit,
+      tc.reference_range_text, tc.description as test_description
+    FROM test_results tr
+    JOIN test_catalog tc ON tr.test_id = tc.id
+    JOIN lab_orders lo ON tr.order_id = lo.id
+    WHERE lo.patient_id = ?
+    ORDER BY tc.category, tc.name
+  `).all(req.session.patient.id);
+
+  res.render('pages/portal/education', { patientTests });
+});
+
 module.exports = router;

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Education - SimplyDiagnostic Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav-inner">
+      <a href="/portal" class="portal-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        SimplyDiagnostic
+      </a>
+      <div class="portal-nav-links">
+        <a href="/portal" class="portal-nav-link">Dashboard</a>
+        <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
+        <a href="/portal/education" class="portal-nav-link active">Education</a>
+        <a href="/portal/profile" class="portal-nav-link">Profile</a>
+      </div>
+      <div class="portal-nav-user">
+        <span class="portal-user-name"><%= patient.first_name %> <%= patient.last_name %></span>
+        <a href="/portal/logout" class="portal-btn portal-btn-outline portal-btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="portal-container">
+    <div class="portal-page-header">
+      <h1>Health Education</h1>
+      <p>Learn about your lab tests, what your results mean, and how to stay healthy.</p>
+    </div>
+
+    <!-- Quick Tips Banner -->
+    <div class="edu-tips-banner">
+      <div class="edu-tips-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="edu-tips-content">
+        <h3>Understanding Your Results</h3>
+        <p>Lab results include a reference range showing what's considered normal. Results outside this range are flagged but don't always indicate a problem. Your physician will interpret your results in the context of your overall health.</p>
+      </div>
+    </div>
+
+    <!-- How to Read Results -->
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        How to Read Your Lab Report
+      </h2>
+      <div class="edu-guide-grid">
+        <div class="edu-guide-card">
+          <div class="edu-guide-icon" style="background: var(--p-primary-bg); color: var(--p-primary);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <h4>Test Name & Code</h4>
+          <p>Each test has a name (e.g., "Glucose") and a short code. This identifies what was measured in your sample.</p>
+        </div>
+        <div class="edu-guide-card">
+          <div class="edu-guide-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h4>Result Value</h4>
+          <p>The measured amount, shown with units (e.g., mg/dL, mmol/L). This is the number your doctor reviews.</p>
+        </div>
+        <div class="edu-guide-card">
+          <div class="edu-guide-icon" style="background: var(--p-warning-bg); color: var(--p-warning);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+          </div>
+          <h4>Reference Range</h4>
+          <p>The expected range for healthy individuals. Results within this range are typically considered normal.</p>
+        </div>
+        <div class="edu-guide-card">
+          <div class="edu-guide-icon" style="background: var(--p-danger-bg); color: var(--p-danger);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h4>Flags</h4>
+          <p><strong>Normal</strong> = within range. <strong>High/Low</strong> = outside range. <strong>Critical</strong> = needs immediate attention.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Common Lab Tests Encyclopedia -->
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Common Lab Tests Explained
+      </h2>
+      <div class="edu-search-wrap">
+        <div class="input-with-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="edu-search" placeholder="Search tests..." class="edu-search-input">
+        </div>
+      </div>
+
+      <div class="edu-accordion" id="edu-tests">
+        <!-- Complete Blood Count -->
+        <div class="edu-accordion-item" data-tags="cbc blood cells wbc rbc hemoglobin hematocrit platelets">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(239,68,68,0.1); color: #ef4444;">Hematology</span>
+              <h4>Complete Blood Count (CBC)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>A CBC measures several components of your blood including red blood cells (carry oxygen), white blood cells (fight infection), hemoglobin (oxygen-carrying protein), hematocrit (percentage of red blood cells), and platelets (help clotting).</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>CBCs help screen for anemia, infection, blood disorders, and monitor overall health. It's one of the most commonly ordered blood tests.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>No special preparation is usually needed. Stay hydrated and follow any specific instructions from your doctor.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Key Components</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>WBC</strong></td><td>White blood cell count</td><td>4.5 - 11.0 x10^9/L</td></tr>
+                  <tr><td><strong>RBC</strong></td><td>Red blood cell count</td><td>4.5 - 5.5 x10^12/L</td></tr>
+                  <tr><td><strong>HGB</strong></td><td>Hemoglobin</td><td>12.0 - 17.5 g/dL</td></tr>
+                  <tr><td><strong>HCT</strong></td><td>Hematocrit</td><td>36 - 50%</td></tr>
+                  <tr><td><strong>PLT</strong></td><td>Platelets</td><td>150 - 400 x10^9/L</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Basic Metabolic Panel -->
+        <div class="edu-accordion-item" data-tags="bmp metabolic glucose sodium potassium calcium kidney bun creatinine">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(99,102,241,0.1); color: #6366f1;">Chemistry</span>
+              <h4>Basic Metabolic Panel (BMP)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>A BMP measures 8 substances in your blood: glucose (blood sugar), calcium, sodium, potassium, chloride, bicarbonate (CO2), blood urea nitrogen (BUN), and creatinine. It provides a snapshot of your body's metabolism.</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>Monitors blood sugar, kidney function, and electrolyte balance. Often ordered as part of routine checkups or to monitor chronic conditions like diabetes or kidney disease.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>Fasting for 8-12 hours may be required (water is usually okay). Follow your doctor's specific instructions.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Key Components</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>Glucose</strong></td><td>Blood sugar level</td><td>70 - 100 mg/dL (fasting)</td></tr>
+                  <tr><td><strong>BUN</strong></td><td>Kidney waste product</td><td>7 - 20 mg/dL</td></tr>
+                  <tr><td><strong>Creatinine</strong></td><td>Kidney function marker</td><td>0.7 - 1.3 mg/dL</td></tr>
+                  <tr><td><strong>Sodium</strong></td><td>Electrolyte balance</td><td>136 - 145 mEq/L</td></tr>
+                  <tr><td><strong>Potassium</strong></td><td>Heart & muscle function</td><td>3.5 - 5.0 mEq/L</td></tr>
+                  <tr><td><strong>Calcium</strong></td><td>Bone & nerve health</td><td>8.5 - 10.5 mg/dL</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lipid Panel -->
+        <div class="edu-accordion-item" data-tags="lipid cholesterol hdl ldl triglycerides heart cardiovascular">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(245,158,11,0.1); color: #f59e0b;">Cardiovascular</span>
+              <h4>Lipid Panel (Cholesterol)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>A lipid panel measures fats in your blood: total cholesterol, HDL ("good" cholesterol), LDL ("bad" cholesterol), and triglycerides. These levels help assess your cardiovascular risk.</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>To evaluate your risk of heart disease and stroke. Regular monitoring helps track the effectiveness of lifestyle changes or cholesterol-lowering medications.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>Fasting for 9-12 hours is typically required. Water and most medications are usually okay. Avoid alcohol for 24 hours before the test.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Desirable Levels</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>Total Cholesterol</strong></td><td>Overall cholesterol</td><td>&lt; 200 mg/dL</td></tr>
+                  <tr><td><strong>HDL</strong></td><td>Good cholesterol</td><td>&gt; 40 mg/dL (higher is better)</td></tr>
+                  <tr><td><strong>LDL</strong></td><td>Bad cholesterol</td><td>&lt; 100 mg/dL</td></tr>
+                  <tr><td><strong>Triglycerides</strong></td><td>Blood fats</td><td>&lt; 150 mg/dL</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comprehensive Metabolic Panel -->
+        <div class="edu-accordion-item" data-tags="cmp metabolic liver kidney albumin bilirubin alt ast alkaline phosphatase protein">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(99,102,241,0.1); color: #6366f1;">Chemistry</span>
+              <h4>Comprehensive Metabolic Panel (CMP)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>A CMP includes all 8 BMP tests plus 6 additional tests that evaluate liver function: ALT, AST, alkaline phosphatase, bilirubin, albumin, and total protein. It provides a comprehensive view of your metabolic health.</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>To evaluate kidney and liver function, blood sugar, and electrolyte levels. Often ordered during annual exams or to monitor medications that may affect the liver or kidneys.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>Fasting for 10-12 hours is typically required. Drink water normally. Tell your doctor about all medications and supplements you take.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Additional Liver Markers</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>ALT</strong></td><td>Liver enzyme</td><td>7 - 56 U/L</td></tr>
+                  <tr><td><strong>AST</strong></td><td>Liver enzyme</td><td>10 - 40 U/L</td></tr>
+                  <tr><td><strong>ALP</strong></td><td>Alkaline phosphatase</td><td>44 - 147 U/L</td></tr>
+                  <tr><td><strong>Bilirubin</strong></td><td>Liver waste product</td><td>0.1 - 1.2 mg/dL</td></tr>
+                  <tr><td><strong>Albumin</strong></td><td>Blood protein</td><td>3.4 - 5.4 g/dL</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thyroid Panel -->
+        <div class="edu-accordion-item" data-tags="thyroid tsh t3 t4 hormone metabolism energy weight">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(139,92,246,0.1); color: #8b5cf6;">Endocrine</span>
+              <h4>Thyroid Function Tests</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>Thyroid tests measure how well your thyroid gland is working. TSH (Thyroid Stimulating Hormone) is the primary screening test. Free T4 and T3 may also be measured to provide a complete picture.</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>To diagnose thyroid disorders. An overactive thyroid (hyperthyroidism) can cause weight loss and anxiety. An underactive thyroid (hypothyroidism) can cause fatigue and weight gain.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>No fasting is usually required. If you take thyroid medication, your doctor may advise when to take it relative to the blood draw.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Key Components</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>TSH</strong></td><td>Thyroid stimulating hormone</td><td>0.4 - 4.0 mIU/L</td></tr>
+                  <tr><td><strong>Free T4</strong></td><td>Active thyroid hormone</td><td>0.8 - 1.8 ng/dL</td></tr>
+                  <tr><td><strong>Free T3</strong></td><td>Active thyroid hormone</td><td>2.3 - 4.2 pg/mL</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hemoglobin A1c -->
+        <div class="edu-accordion-item" data-tags="a1c hba1c hemoglobin diabetes blood sugar glucose average">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(236,72,153,0.1); color: #ec4899;">Diabetes</span>
+              <h4>Hemoglobin A1c (HbA1c)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>The A1c test measures your average blood sugar levels over the past 2-3 months. It reflects how much sugar is attached to your hemoglobin (the protein in red blood cells that carries oxygen).</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>To screen for diabetes or prediabetes, and to monitor blood sugar control in people with diabetes. It provides a longer-term picture than a single glucose reading.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>No fasting is required. The test can be done at any time of day.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Result Ranges</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>Normal</strong></td><td>No diabetes</td><td>&lt; 5.7%</td></tr>
+                  <tr><td><strong>Prediabetes</strong></td><td>Increased risk</td><td>5.7% - 6.4%</td></tr>
+                  <tr><td><strong>Diabetes</strong></td><td>Diabetes diagnosed</td><td>&ge; 6.5%</td></tr>
+                  <tr><td><strong>Target (diabetic)</strong></td><td>Well-controlled</td><td>&lt; 7.0%</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Urinalysis -->
+        <div class="edu-accordion-item" data-tags="urinalysis urine ua kidney infection uti protein glucose">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(14,165,233,0.1); color: #0ea5e9;">Urinalysis</span>
+              <h4>Urinalysis (UA)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>A urinalysis examines the appearance, concentration, and content of your urine. It checks for substances like protein, glucose, blood, bacteria, and white blood cells.</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>To detect urinary tract infections, kidney disease, diabetes, and other conditions. Often part of routine health exams, pre-surgery checkups, or pregnancy monitoring.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>A "clean-catch" midstream sample is usually requested. Your healthcare provider will give you specific instructions on how to collect the sample properly.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>What's Checked</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>Color/Clarity</strong></td><td>Visual examination</td><td>Pale to dark yellow, clear</td></tr>
+                  <tr><td><strong>pH</strong></td><td>Acidity level</td><td>4.5 - 8.0</td></tr>
+                  <tr><td><strong>Protein</strong></td><td>Kidney marker</td><td>Negative</td></tr>
+                  <tr><td><strong>Glucose</strong></td><td>Blood sugar marker</td><td>Negative</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vitamin D -->
+        <div class="edu-accordion-item" data-tags="vitamin d 25-hydroxy bone calcium deficiency sunshine">
+          <button class="edu-accordion-trigger" aria-expanded="false">
+            <div class="edu-accordion-header">
+              <span class="edu-category-badge" style="background: rgba(245,158,11,0.1); color: #f59e0b;">Nutrition</span>
+              <h4>Vitamin D (25-Hydroxy)</h4>
+            </div>
+            <svg class="edu-accordion-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="edu-accordion-content">
+            <div class="edu-test-detail">
+              <div class="edu-test-what">
+                <h5>What is it?</h5>
+                <p>This test measures the level of vitamin D in your blood. Vitamin D is essential for calcium absorption, bone health, immune function, and mood regulation.</p>
+              </div>
+              <div class="edu-test-why">
+                <h5>Why is it ordered?</h5>
+                <p>To check for vitamin D deficiency, which is common especially in people with limited sun exposure, darker skin, or certain medical conditions. Deficiency can lead to bone weakness and increased infection risk.</p>
+              </div>
+              <div class="edu-test-prep">
+                <h5>How to prepare</h5>
+                <p>No fasting is usually required. Continue taking your usual medications and supplements unless your doctor says otherwise.</p>
+              </div>
+              <div class="edu-test-components">
+                <h5>Result Ranges</h5>
+                <table class="edu-mini-table">
+                  <tr><td><strong>Deficient</strong></td><td>Supplement recommended</td><td>&lt; 20 ng/mL</td></tr>
+                  <tr><td><strong>Insufficient</strong></td><td>May need supplement</td><td>20 - 29 ng/mL</td></tr>
+                  <tr><td><strong>Sufficient</strong></td><td>Healthy level</td><td>30 - 100 ng/mL</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Your Tests Section -->
+    <% if (patientTests.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        Your Tests
+      </h2>
+      <p style="color: var(--p-text-muted); font-size: 14px; margin-bottom: 18px;">Tests from your lab orders and what they measure.</p>
+      <div class="edu-your-tests">
+        <%
+          const cats = {};
+          patientTests.forEach(t => {
+            const c = t.category || 'General';
+            if (!cats[c]) cats[c] = [];
+            cats[c].push(t);
+          });
+        %>
+        <% Object.keys(cats).sort().forEach(cat => { %>
+          <div class="edu-your-test-group">
+            <h4 class="edu-your-test-cat"><%= cat %></h4>
+            <% cats[cat].forEach(t => { %>
+              <div class="edu-your-test-item">
+                <div class="edu-your-test-name">
+                  <strong><%= t.test_name %></strong>
+                  <span class="edu-your-test-code"><%= t.code %></span>
+                </div>
+                <% if (t.test_description) { %>
+                  <p class="edu-your-test-desc"><%= t.test_description %></p>
+                <% } %>
+                <% if (t.reference_range_text) { %>
+                  <span class="edu-your-test-range">Reference: <%= t.reference_range_text %></span>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Health Tips -->
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Healthy Living Tips
+      </h2>
+      <div class="edu-tips-grid">
+        <div class="edu-tip-card">
+          <div class="edu-tip-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <h4>Stay Hydrated</h4>
+          <p>Drink plenty of water before your blood draw. Being well-hydrated makes it easier to draw blood and can improve the accuracy of some tests.</p>
+        </div>
+        <div class="edu-tip-card">
+          <div class="edu-tip-icon" style="background: rgba(99,102,241,0.1); color: #6366f1;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h4>Follow Fasting Instructions</h4>
+          <p>If your doctor says to fast, avoid all food and drinks (except water) for the specified time. This ensures accurate results for glucose and lipid tests.</p>
+        </div>
+        <div class="edu-tip-card">
+          <div class="edu-tip-icon" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h4>Track Your Results</h4>
+          <p>Use the trend charts on your dashboard to monitor how your values change over time. Consistent tracking helps you and your doctor make better health decisions.</p>
+        </div>
+        <div class="edu-tip-card">
+          <div class="edu-tip-icon" style="background: rgba(236,72,153,0.1); color: #ec4899;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h4>Ask Questions</h4>
+          <p>Don't hesitate to ask your healthcare provider about your results. Understanding your lab work helps you take charge of your health.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-info-box">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      <div>
+        <strong>Medical Disclaimer</strong>
+        <p>This educational content is for informational purposes only and does not replace professional medical advice. Always consult your healthcare provider for interpretation of your lab results and medical decisions.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="portal-footer">
+    <p>&copy; <%= new Date().getFullYear() %> SimplyDiagnostic Laboratory. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Accordion functionality
+    document.querySelectorAll('.edu-accordion-trigger').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.edu-accordion-item');
+        const isOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.edu-accordion-item.open').forEach(i => i.classList.remove('open'));
+        // Toggle clicked
+        if (!isOpen) item.classList.add('open');
+        btn.setAttribute('aria-expanded', !isOpen);
+      });
+    });
+
+    // Search functionality
+    const searchInput = document.getElementById('edu-search');
+    searchInput.addEventListener('input', function() {
+      const query = this.value.toLowerCase().trim();
+      document.querySelectorAll('.edu-accordion-item').forEach(item => {
+        const tags = item.getAttribute('data-tags') || '';
+        const title = item.querySelector('h4').textContent.toLowerCase();
+        const match = !query || tags.includes(query) || title.includes(query);
+        item.style.display = match ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
