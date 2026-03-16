@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Results - SimplyDiagnostic Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/portal.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav-inner">
+      <a href="/portal" class="portal-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        SimplyDiagnostic
+      </a>
+      <div class="portal-nav-links">
+        <a href="/portal" class="portal-nav-link active">Dashboard</a>
+        <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
+        <a href="/portal/profile" class="portal-nav-link">Profile</a>
+      </div>
+      <div class="portal-nav-user">
+        <span class="portal-user-name"><%= patient.first_name %> <%= patient.last_name %></span>
+        <a href="/portal/logout" class="portal-btn portal-btn-outline portal-btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="portal-container">
+    <!-- Greeting Banner -->
+    <div class="portal-greeting">
+      <div class="greeting-text">
+        <h1>Hello, <%= patient.first_name %>!</h1>
+        <p>Welcome to your patient portal. Here you can view your lab results, track orders, and manage your account.</p>
+      </div>
+      <div class="greeting-id">
+        <span class="id-label">Patient ID</span>
+        <span class="id-value"><%= patient.patient_id %></span>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="portal-stats">
+      <div class="portal-stat-card">
+        <div class="stat-icon stat-icon-results">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= recentResults.length %></span>
+          <span class="stat-label">Recent Results</span>
+        </div>
+      </div>
+      <div class="portal-stat-card">
+        <div class="stat-icon stat-icon-pending">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= pendingOrders.length %></span>
+          <span class="stat-label">Pending Orders</span>
+        </div>
+      </div>
+      <div class="portal-stat-card">
+        <div class="stat-icon stat-icon-completed">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= completedOrders.length %></span>
+          <span class="stat-label">Completed Orders</span>
+        </div>
+      </div>
+      <div class="portal-stat-card">
+        <div class="stat-icon stat-icon-invoices">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= unpaidInvoices.length %></span>
+          <span class="stat-label">Unpaid Invoices</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Orders -->
+    <% if (pendingOrders.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Pending Orders
+      </h2>
+      <div class="portal-cards">
+        <% pendingOrders.forEach(order => { %>
+          <div class="portal-order-card pending">
+            <div class="order-card-header">
+              <span class="order-number"><%= order.order_number %></span>
+              <span class="order-status status-<%= order.status %>"><%= order.status.replace('_', ' ') %></span>
+            </div>
+            <div class="order-card-body">
+              <div class="order-meta">
+                <span>Ordered: <%= new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                <% if (order.ordering_physician) { %>
+                  <span>Physician: <%= order.ordering_physician %></span>
+                <% } %>
+              </div>
+              <div class="order-progress">
+                <div class="progress-bar">
+                  <div class="progress-fill" style="width: <%= order.test_count > 0 ? Math.round((order.done_count / order.test_count) * 100) : 0 %>%"></div>
+                </div>
+                <span class="progress-text"><%= order.done_count %>/<%= order.test_count %> tests complete</span>
+              </div>
+            </div>
+            <a href="/portal/order/<%= order.id %>" class="order-card-link">View Details</a>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Recent Results -->
+    <% if (recentResults.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Recent Results
+      </h2>
+      <div class="portal-results-table-wrap">
+        <table class="portal-results-table">
+          <thead>
+            <tr>
+              <th>Test</th>
+              <th>Result</th>
+              <th>Flag</th>
+              <th>Date</th>
+              <th>Order</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% recentResults.forEach(r => { %>
+              <tr class="<%= r.flag === 'HIGH' || r.flag === 'LOW' ? 'flagged-row' : '' %>">
+                <td>
+                  <div class="result-test-name"><%= r.test_name %></div>
+                  <div class="result-test-code"><%= r.code %></div>
+                </td>
+                <td class="result-value"><%= r.result_value %> <span class="result-unit"><%= r.unit || '' %></span></td>
+                <td>
+                  <% if (r.flag === 'HIGH') { %>
+                    <span class="result-flag flag-high">HIGH</span>
+                  <% } else if (r.flag === 'LOW') { %>
+                    <span class="result-flag flag-low">LOW</span>
+                  <% } else if (r.flag === 'CRITICAL') { %>
+                    <span class="result-flag flag-critical">CRITICAL</span>
+                  <% } else { %>
+                    <span class="result-flag flag-normal">Normal</span>
+                  <% } %>
+                </td>
+                <td><%= r.performed_at ? new Date(r.performed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-' %></td>
+                <td><a href="/portal/order/<%= r.order_id || '' %>" class="portal-link"><%= r.order_number %></a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Result Trend Chart -->
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Result Trends
+      </h2>
+      <div class="portal-chart-controls">
+        <select id="trend-test-select" class="portal-select">
+          <option value="">Select a test to view trends...</option>
+        </select>
+      </div>
+      <div class="portal-chart-container" id="trend-chart-wrap" style="display:none;">
+        <canvas id="trendChart"></canvas>
+      </div>
+      <div class="portal-empty-state" id="trend-empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <p>Select a test above to view your result history over time</p>
+      </div>
+    </div>
+
+    <!-- Completed Orders -->
+    <% if (completedOrders.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Completed Orders
+      </h2>
+      <div class="portal-cards">
+        <% completedOrders.forEach(order => { %>
+          <div class="portal-order-card completed">
+            <div class="order-card-header">
+              <span class="order-number"><%= order.order_number %></span>
+              <span class="order-status status-completed">Completed</span>
+            </div>
+            <div class="order-card-body">
+              <div class="order-meta">
+                <span>Ordered: <%= new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+                <span><%= order.test_count %> test<%= order.test_count !== 1 ? 's' : '' %></span>
+              </div>
+            </div>
+            <div class="order-card-actions">
+              <a href="/portal/order/<%= order.id %>" class="portal-btn portal-btn-sm portal-btn-outline">View Results</a>
+              <a href="/portal/report/<%= order.id %>" class="portal-btn portal-btn-sm portal-btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                PDF Report
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Unpaid Invoices -->
+    <% if (unpaidInvoices.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Unpaid Invoices
+      </h2>
+      <div class="portal-cards">
+        <% unpaidInvoices.forEach(inv => { %>
+          <div class="portal-invoice-card unpaid">
+            <div class="invoice-card-header">
+              <span class="invoice-number"><%= inv.invoice_number %></span>
+              <span class="invoice-amount">$<%= parseFloat(inv.total_amount || 0).toFixed(2) %></span>
+            </div>
+            <div class="invoice-card-body">
+              <span>Order: <%= inv.order_number %></span>
+              <span>Date: <%= new Date(inv.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+            </div>
+            <a href="/portal/invoices" class="portal-link">View All Invoices</a>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Empty State if nothing -->
+    <% if (recentResults.length === 0 && pendingOrders.length === 0 && completedOrders.length === 0) { %>
+    <div class="portal-empty-hero">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <h3>No results yet</h3>
+      <p>Your lab results will appear here once they are available. Check back soon!</p>
+    </div>
+    <% } %>
+  </div>
+
+  <footer class="portal-footer">
+    <p>&copy; <%= new Date().getFullYear() %> SimplyDiagnostic Laboratory. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Load available tests for trend chart
+    const trendSelect = document.getElementById('trend-test-select');
+    const trendWrap = document.getElementById('trend-chart-wrap');
+    const trendEmpty = document.getElementById('trend-empty');
+    let trendChart = null;
+
+    fetch('/portal/api/history')
+      .then(r => r.json())
+      .then(tests => {
+        tests.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t.code;
+          opt.textContent = t.test_name + (t.unit ? ` (${t.unit})` : '');
+          trendSelect.appendChild(opt);
+        });
+      });
+
+    trendSelect.addEventListener('change', function() {
+      if (!this.value) {
+        trendWrap.style.display = 'none';
+        trendEmpty.style.display = 'flex';
+        return;
+      }
+      fetch('/portal/api/history?test=' + encodeURIComponent(this.value))
+        .then(r => r.json())
+        .then(data => {
+          if (data.length === 0) {
+            trendWrap.style.display = 'none';
+            trendEmpty.style.display = 'flex';
+            return;
+          }
+          trendWrap.style.display = 'block';
+          trendEmpty.style.display = 'none';
+
+          const labels = data.map(d => new Date(d.performed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+          const values = data.map(d => d.result_numeric);
+          const refMin = data[0].reference_range_min;
+          const refMax = data[0].reference_range_max;
+
+          if (trendChart) trendChart.destroy();
+
+          const datasets = [{
+            label: data[0].test_name,
+            data: values,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 5,
+            pointBackgroundColor: '#6366f1'
+          }];
+
+          if (refMin != null) {
+            datasets.push({
+              label: 'Low Reference',
+              data: Array(values.length).fill(refMin),
+              borderColor: 'rgba(239, 68, 68, 0.4)',
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false
+            });
+          }
+          if (refMax != null) {
+            datasets.push({
+              label: 'High Reference',
+              data: Array(values.length).fill(refMax),
+              borderColor: 'rgba(239, 68, 68, 0.4)',
+              borderDash: [5, 5],
+              pointRadius: 0,
+              fill: false
+            });
+          }
+
+          trendChart = new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: { labels, datasets },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'bottom' }
+              },
+              scales: {
+                y: {
+                  title: { display: true, text: data[0].unit || 'Value' }
+                }
+              }
+            }
+          });
+        });
+    });
+  </script>
+</body>
+</html>

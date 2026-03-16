@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - SimplyDiagnostic Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav-inner">
+      <a href="/portal" class="portal-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        SimplyDiagnostic
+      </a>
+      <div class="portal-nav-links">
+        <a href="/portal" class="portal-nav-link">Dashboard</a>
+        <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
+        <a href="/portal/profile" class="portal-nav-link active">Profile</a>
+      </div>
+      <div class="portal-nav-user">
+        <span class="portal-user-name"><%= patient.first_name %> <%= patient.last_name %></span>
+        <a href="/portal/logout" class="portal-btn portal-btn-outline portal-btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="portal-container">
+    <div class="portal-breadcrumb">
+      <a href="/portal" class="portal-link">Dashboard</a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <span>Profile</span>
+    </div>
+
+    <div class="portal-page-header">
+      <h1>My Profile</h1>
+      <p>Your personal information on file</p>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-profile-card">
+        <div class="profile-avatar">
+          <span class="avatar-initials"><%= patient.first_name.charAt(0) %><%= patient.last_name.charAt(0) %></span>
+        </div>
+        <div class="profile-details">
+          <div class="profile-grid">
+            <div class="profile-field">
+              <span class="profile-label">Patient ID</span>
+              <span class="profile-value"><%= patient.patient_id %></span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Full Name</span>
+              <span class="profile-value"><%= patient.first_name %> <%= patient.last_name %></span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Date of Birth</span>
+              <span class="profile-value"><%= patient.date_of_birth ? new Date(patient.date_of_birth).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Not on file' %></span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Gender</span>
+              <span class="profile-value"><%= patient.gender ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1) : 'Not on file' %></span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Email</span>
+              <span class="profile-value"><%= patient.email || 'Not on file' %></span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Phone</span>
+              <span class="profile-value"><%= patient.phone || 'Not on file' %></span>
+            </div>
+            <div class="profile-field">
+              <span class="profile-label">Address</span>
+              <span class="profile-value"><%= patient.address || 'Not on file' %></span>
+            </div>
+            <% if (patient.insurance_provider) { %>
+            <div class="profile-field">
+              <span class="profile-label">Insurance Provider</span>
+              <span class="profile-value"><%= patient.insurance_provider %></span>
+            </div>
+            <% } %>
+            <% if (patient.insurance_id) { %>
+            <div class="profile-field">
+              <span class="profile-label">Insurance ID</span>
+              <span class="profile-value"><%= patient.insurance_id %></span>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-section">
+      <div class="portal-info-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <strong>Need to update your information?</strong>
+          <p>Please contact SimplyDiagnostic Laboratory to update your personal details, insurance information, or contact preferences.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="portal-back-link">
+      <a href="/portal" class="portal-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <footer class="portal-footer">
+    <p>&copy; <%= new Date().getFullYear() %> SimplyDiagnostic Laboratory. All rights reserved.</p>
+  </footer>
+</body>
+</html>

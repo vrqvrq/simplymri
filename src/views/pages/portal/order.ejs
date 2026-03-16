@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order <%= order.order_number %> - SimplyDiagnostic Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav-inner">
+      <a href="/portal" class="portal-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        SimplyDiagnostic
+      </a>
+      <div class="portal-nav-links">
+        <a href="/portal" class="portal-nav-link">Dashboard</a>
+        <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
+        <a href="/portal/profile" class="portal-nav-link">Profile</a>
+      </div>
+      <div class="portal-nav-user">
+        <span class="portal-user-name"><%= patient.first_name %> <%= patient.last_name %></span>
+        <a href="/portal/logout" class="portal-btn portal-btn-outline portal-btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="portal-container">
+    <div class="portal-breadcrumb">
+      <a href="/portal" class="portal-link">Dashboard</a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <span>Order <%= order.order_number %></span>
+    </div>
+
+    <div class="portal-order-header">
+      <div class="order-header-info">
+        <h1>Order <%= order.order_number %></h1>
+        <div class="order-header-meta">
+          <span class="order-status status-<%= order.status %>"><%= order.status.replace('_', ' ') %></span>
+          <span class="order-date">Ordered: <%= new Date(order.created_at).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) %></span>
+          <% if (order.ordering_physician) { %>
+            <span class="order-physician">Physician: <%= order.ordering_physician %></span>
+          <% } %>
+        </div>
+      </div>
+      <% if (order.status === 'completed' || order.status === 'verified') { %>
+      <a href="/portal/report/<%= order.id %>" class="portal-btn portal-btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF Report
+      </a>
+      <% } %>
+    </div>
+
+    <!-- Results Table -->
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Test Results (<%= results.length %>)
+      </h2>
+
+      <% if (results.length === 0) { %>
+        <div class="portal-empty-state">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <p>Results are still being processed. Check back soon!</p>
+        </div>
+      <% } else { %>
+        <%
+          // Group results by category
+          const categories = {};
+          results.forEach(r => {
+            const cat = r.category || 'General';
+            if (!categories[cat]) categories[cat] = [];
+            categories[cat].push(r);
+          });
+        %>
+
+        <% Object.keys(categories).forEach(cat => { %>
+          <div class="portal-result-category">
+            <h3 class="category-title"><%= cat %></h3>
+            <div class="portal-results-table-wrap">
+              <table class="portal-results-table">
+                <thead>
+                  <tr>
+                    <th>Test</th>
+                    <th>Result</th>
+                    <th>Reference Range</th>
+                    <th>Flag</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% categories[cat].forEach(r => { %>
+                    <tr class="<%= r.flag === 'HIGH' || r.flag === 'LOW' || r.flag === 'CRITICAL' ? 'flagged-row' : '' %>">
+                      <td>
+                        <div class="result-test-name"><%= r.test_name %></div>
+                        <div class="result-test-code"><%= r.code %></div>
+                        <% if (r.test_description) { %>
+                          <div class="result-test-desc"><%= r.test_description %></div>
+                        <% } %>
+                      </td>
+                      <td class="result-value">
+                        <% if (r.result_value) { %>
+                          <%= r.result_value %> <span class="result-unit"><%= r.unit || '' %></span>
+                        <% } else { %>
+                          <span class="result-pending">Pending</span>
+                        <% } %>
+                      </td>
+                      <td class="result-ref">
+                        <% if (r.reference_range_text) { %>
+                          <%= r.reference_range_text %>
+                        <% } else { %>
+                          -
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (!r.result_value) { %>
+                          <span class="result-flag flag-pending">-</span>
+                        <% } else if (r.flag === 'HIGH') { %>
+                          <span class="result-flag flag-high">HIGH</span>
+                        <% } else if (r.flag === 'LOW') { %>
+                          <span class="result-flag flag-low">LOW</span>
+                        <% } else if (r.flag === 'CRITICAL') { %>
+                          <span class="result-flag flag-critical">CRITICAL</span>
+                        <% } else { %>
+                          <span class="result-flag flag-normal">Normal</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <% if (r.status === 'verified') { %>
+                          <span class="result-status status-verified">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Verified
+                          </span>
+                        <% } else if (r.status === 'completed') { %>
+                          <span class="result-status status-completed">Completed</span>
+                        <% } else { %>
+                          <span class="result-status status-pending">In Progress</span>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <% if (order.notes) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Notes
+      </h2>
+      <div class="portal-notes">
+        <p><%= order.notes %></p>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="portal-back-link">
+      <a href="/portal" class="portal-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <footer class="portal-footer">
+    <p>&copy; <%= new Date().getFullYear() %> SimplyDiagnostic Laboratory. All rights reserved.</p>
+  </footer>
+</body>
+</html>

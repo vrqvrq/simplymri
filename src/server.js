@@ -39,6 +39,7 @@ app.use('/physicians', require('./routes/physicians'));
 app.use('/worklist', require('./routes/worklist'));
 app.use('/panels', require('./routes/panels'));
 app.use('/tests', require('./routes/tests'));
+app.use('/portal', require('./routes/portal'));
 
 // Error handler
 app.use((err, req, res, next) => {
