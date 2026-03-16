@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: simplydiagnostic-lis
+    runtime: node
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATA_DIR
+        value: /data
+    disk:
+      name: lis-data
+      mountPath: /data
+      sizeGB: 1
