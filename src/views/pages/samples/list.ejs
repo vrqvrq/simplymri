@@ -18,6 +18,7 @@
     <thead>
       <tr>
         <th>Sample ID</th>
+        <th>Barcode</th>
         <th>Order #</th>
         <th>Patient</th>
         <th>Type</th>
@@ -30,12 +31,18 @@
       <% samples.forEach(function(s) { %>
         <tr>
           <td><strong><%= s.sample_id %></strong></td>
+          <td>
+            <div class="barcode-section">
+              <img src="/codes/barcode/<%= s.sample_id %>" alt="barcode" height="30">
+            </div>
+          </td>
           <td><a href="/orders/<%= s.order_id %>"><%= s.order_number %></a></td>
           <td><%= s.first_name %> <%= s.last_name %></td>
           <td><%= s.sample_type %></td>
           <td><%= s.collection_date %></td>
           <td><span class="badge badge-<%= s.status %>"><%= s.status %></span></td>
           <td>
+            <a href="/codes/label/<%= s.sample_id %>" class="btn btn-sm btn-outline" target="_blank">Label</a>
             <% if (s.status === 'collected') { %>
               <form method="POST" action="/samples/<%= s.id %>/status" style="display:inline">
                 <input type="hidden" name="status" value="processing">
@@ -51,7 +58,7 @@
         </tr>
       <% }); %>
       <% if (samples.length === 0) { %>
-        <tr><td colspan="7" class="text-center">No samples found</td></tr>
+        <tr><td colspan="8" class="text-center">No samples found</td></tr>
       <% } %>
     </tbody>
   </table>

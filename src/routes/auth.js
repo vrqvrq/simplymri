@@ -29,6 +29,7 @@ router.post('/login', (req, res) => {
     role: user.role
   };
 
+  res.locals.audit('Login', 'user', user.username, `${user.full_name} logged in`);
   res.redirect('/dashboard');
 });
 

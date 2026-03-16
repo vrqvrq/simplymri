@@ -2,21 +2,31 @@
 
 <div class="page-header">
   <h1>Patients</h1>
-  <a href="/patients/new" class="btn btn-primary">+ New Patient</a>
+  <div class="page-header-actions">
+    <a href="/export/patients" class="btn btn-outline btn-sm">Export CSV</a>
+    <a href="/patients/new" class="btn btn-primary">+ New Patient</a>
+  </div>
 </div>
 
 <div class="card">
   <form method="GET" action="/patients" class="search-form">
-    <input type="text" name="search" placeholder="Search by name, ID, or phone..." value="<%= search %>" class="search-input">
+    <div class="autocomplete-wrapper">
+      <input type="text" id="patient-search-auto" name="search" placeholder="Search by name, ID, or phone..." value="<%= search %>" class="search-input">
+      <div id="autocomplete-results" class="autocomplete-results"></div>
+    </div>
     <button type="submit" class="btn btn-primary">Search</button>
     <% if (search) { %><a href="/patients" class="btn btn-outline">Clear</a><% } %>
   </form>
 </div>
 
 <div class="card">
+  <div class="bulk-actions" id="bulk-actions">
+    <span class="bulk-count">0 selected</span>
+  </div>
   <table class="table">
     <thead>
       <tr>
+        <th style="width:40px"><input type="checkbox" class="bulk-checkbox" id="bulk-select-all"></th>
         <th>Patient ID</th>
         <th>Name</th>
         <th>DOB</th>
@@ -29,6 +39,7 @@
     <tbody>
       <% patients.forEach(function(p) { %>
         <tr>
+          <td><input type="checkbox" class="bulk-checkbox" value="<%= p.id %>"></td>
           <td><strong><%= p.patient_id %></strong></td>
           <td><%= p.first_name %> <%= p.last_name %></td>
           <td><%= p.date_of_birth %></td>
@@ -42,7 +53,7 @@
         </tr>
       <% }); %>
       <% if (patients.length === 0) { %>
-        <tr><td colspan="7" class="text-center">No patients found</td></tr>
+        <tr><td colspan="8" class="text-center">No patients found</td></tr>
       <% } %>
     </tbody>
   </table>

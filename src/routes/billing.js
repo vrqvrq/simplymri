@@ -72,6 +72,7 @@ router.post('/generate/:orderId', requireAuth, (req, res) => {
 
   try {
     const invoiceId = generateInvoice();
+    res.locals.audit('Generated invoice', 'invoice', String(invoiceId), `Order ${order.order_number}`);
     res.redirect(`/billing/${invoiceId}`);
   } catch (err) {
     res.redirect(`/orders/${req.params.orderId}?error=${encodeURIComponent(err.message)}`);
@@ -100,6 +101,7 @@ router.get('/:id', requireAuth, (req, res) => {
 router.post('/:id/pay', requireAuth, (req, res) => {
   const { payment_method } = req.body;
   db.prepare("UPDATE invoices SET status = 'paid', payment_method = ?, paid_at = datetime('now') WHERE id = ?").run(payment_method || 'cash', req.params.id);
+  res.locals.audit('Recorded payment', 'invoice', req.params.id, `Payment via ${payment_method || 'cash'}`);
   res.redirect(`/billing/${req.params.id}`);
 });
 

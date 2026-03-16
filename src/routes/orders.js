@@ -90,6 +90,7 @@ router.post('/', requireAuth, (req, res) => {
 
   try {
     const orderId = insertOrder();
+    res.locals.audit('Created order', 'order', order_number, `Patient ${patient_id}, ${selectedTests.length} tests`);
     res.redirect(`/orders/${orderId}`);
   } catch (err) {
     const patients = db.prepare('SELECT id, patient_id, first_name, last_name FROM patients ORDER BY last_name').all();

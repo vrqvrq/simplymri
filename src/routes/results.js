@@ -59,6 +59,7 @@ router.post('/save/:orderId', requireAuth, (req, res) => {
 
   try {
     saveResults();
+    res.locals.audit('Entered results', 'order', req.params.orderId, `${Object.keys(results).length} results saved`);
     res.redirect(`/orders/${req.params.orderId}`);
   } catch (err) {
     res.redirect(`/results/enter/${req.params.orderId}?error=${encodeURIComponent(err.message)}`);
@@ -74,6 +75,7 @@ router.post('/verify/:orderId', requireAuth, (req, res) => {
 
   db.prepare("UPDATE lab_orders SET status = 'verified', updated_at = datetime('now') WHERE id = ?").run(req.params.orderId);
 
+  res.locals.audit('Verified results', 'order', req.params.orderId, 'Results verified');
   res.redirect(`/orders/${req.params.orderId}`);
 });
 

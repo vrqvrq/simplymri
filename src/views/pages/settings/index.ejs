@@ -2,11 +2,10 @@
 
 <div class="page-header">
   <h1>Settings</h1>
+  <div class="page-header-actions">
+    <a href="/export/audit" class="btn btn-outline btn-sm">Export Audit Log</a>
+  </div>
 </div>
-
-<% if (typeof error !== 'undefined' && error) { %>
-  <div class="alert alert-error"><%= error %></div>
-<% } %>
 
 <div class="card">
   <h2>Change Password</h2>
@@ -83,6 +82,72 @@
     <button type="submit" class="btn btn-primary">Add User</button>
   </form>
 </div>
+
+<div class="card">
+  <h2>Email Notifications</h2>
+  <form method="POST" action="/settings/email">
+    <div class="form-row">
+      <div class="form-group">
+        <label>SMTP Host</label>
+        <input type="text" name="smtp_host" placeholder="smtp.gmail.com" value="<%= typeof emailSettings !== 'undefined' && emailSettings ? emailSettings.smtp_host : '' %>">
+      </div>
+      <div class="form-group">
+        <label>SMTP Port</label>
+        <input type="number" name="smtp_port" placeholder="587" value="<%= typeof emailSettings !== 'undefined' && emailSettings ? emailSettings.smtp_port : 587 %>">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>SMTP Username</label>
+        <input type="text" name="smtp_user" value="<%= typeof emailSettings !== 'undefined' && emailSettings ? emailSettings.smtp_user : '' %>">
+      </div>
+      <div class="form-group">
+        <label>SMTP Password</label>
+        <input type="password" name="smtp_pass" placeholder="<%= typeof emailSettings !== 'undefined' && emailSettings && emailSettings.smtp_pass ? '********' : '' %>">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>From Email</label>
+      <input type="email" name="smtp_from" placeholder="lab@simplydiagnostic.com" value="<%= typeof emailSettings !== 'undefined' && emailSettings ? emailSettings.smtp_from : '' %>">
+    </div>
+    <button type="submit" class="btn btn-primary">Save Email Settings</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Audit Log</h2>
+  <div id="audit-log-container">
+    <table class="table audit-table">
+      <thead>
+        <tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th></tr>
+      </thead>
+      <tbody id="audit-log-body">
+        <tr><td colspan="5" class="text-center">Loading...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  fetch('/api/audit-log')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var body = document.getElementById('audit-log-body');
+      if (data.logs.length === 0) {
+        body.innerHTML = '<tr><td colspan="5" class="text-center">No activity yet</td></tr>';
+        return;
+      }
+      body.innerHTML = data.logs.map(function(l) {
+        return '<tr>'
+          + '<td class="time-cell">' + l.created_at + '</td>'
+          + '<td>' + (l.user_name || 'System') + '</td>'
+          + '<td class="action-cell">' + l.action + '</td>'
+          + '<td class="entity-cell">' + l.entity_type + (l.entity_id ? ' #' + l.entity_id : '') + '</td>'
+          + '<td>' + (l.details || '-') + '</td>'
+          + '</tr>';
+      }).join('');
+    });
+</script>
 <% } %>
 
 <%- include('../../partials/footer') %>

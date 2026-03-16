@@ -2,7 +2,11 @@
 
 <div class="page-header">
   <h1>Dashboard</h1>
-  <a href="/orders/new" class="btn btn-primary">+ New Order</a>
+  <div class="page-header-actions">
+    <a href="/export/patients" class="btn btn-outline btn-sm">Export Patients</a>
+    <a href="/export/orders" class="btn btn-outline btn-sm">Export Orders</a>
+    <a href="/orders/new" class="btn btn-primary">+ New Order</a>
+  </div>
 </div>
 
 <div class="stats-grid">
@@ -29,6 +33,33 @@
   <div class="stat-card stat-success">
     <div class="stat-number">$<%= stats.totalRevenue.toFixed(2) %></div>
     <div class="stat-label">Total Revenue</div>
+  </div>
+</div>
+
+<div class="charts-grid" id="charts-grid">
+  <div class="chart-card">
+    <h3>Orders by Status</h3>
+    <canvas id="chart-orders-status" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Daily Orders (14 days)</h3>
+    <canvas id="chart-orders-daily" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Tests by Category</h3>
+    <canvas id="chart-tests-category" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Revenue Trend</h3>
+    <canvas id="chart-revenue" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Top Tests Ordered</h3>
+    <canvas id="chart-top-tests" height="220"></canvas>
+  </div>
+  <div class="chart-card">
+    <h3>Result Flags</h3>
+    <canvas id="chart-abnormal" height="220"></canvas>
   </div>
 </div>
 

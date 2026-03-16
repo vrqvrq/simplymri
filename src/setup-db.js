@@ -148,6 +148,31 @@ db.exec(`
     FOREIGN KEY (invoice_id) REFERENCES invoices(id),
     FOREIGN KEY (test_id) REFERENCES test_catalog(id)
   );
+
+  -- Audit trail
+  CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    user_name TEXT,
+    action TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT,
+    details TEXT,
+    ip_address TEXT,
+    created_at TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
+
+  -- Notification settings
+  CREATE TABLE IF NOT EXISTS notification_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    smtp_host TEXT DEFAULT '',
+    smtp_port INTEGER DEFAULT 587,
+    smtp_user TEXT DEFAULT '',
+    smtp_pass TEXT DEFAULT '',
+    smtp_from TEXT DEFAULT '',
+    enabled INTEGER DEFAULT 0
+  );
 `);
 
 // Seed default admin user

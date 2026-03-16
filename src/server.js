@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const { auditMiddleware } = require('./middleware/audit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,6 +16,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: { maxAge: 8 * 60 * 60 * 1000 } // 8 hours
 }));
+app.use(auditMiddleware);
 
 // View engine
 app.set('view engine', 'ejs');
@@ -30,6 +32,9 @@ app.use('/results', require('./routes/results'));
 app.use('/billing', require('./routes/billing'));
 app.use('/reports', require('./routes/reports'));
 app.use('/settings', require('./routes/settings'));
+app.use('/api', require('./routes/api'));
+app.use('/export', require('./routes/export'));
+app.use('/codes', require('./routes/barcodes'));
 
 // Error handler
 app.use((err, req, res, next) => {

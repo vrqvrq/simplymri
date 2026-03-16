@@ -37,6 +37,7 @@ router.post('/', requireAuth, (req, res) => {
       INSERT INTO patients (patient_id, first_name, last_name, date_of_birth, gender, phone, email, address, insurance_provider, insurance_number, emergency_contact, emergency_phone, notes)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(patient_id, first_name, last_name, date_of_birth, gender, phone, email, address, insurance_provider, insurance_number, emergency_contact, emergency_phone, notes);
+    res.locals.audit('Created patient', 'patient', patient_id, `${first_name} ${last_name}`);
     res.redirect('/patients');
   } catch (err) {
     res.render('pages/patients/form', { patient: req.body, error: err.message });
@@ -75,6 +76,7 @@ router.post('/:id', requireAuth, (req, res) => {
       UPDATE patients SET first_name=?, last_name=?, date_of_birth=?, gender=?, phone=?, email=?, address=?, insurance_provider=?, insurance_number=?, emergency_contact=?, emergency_phone=?, notes=?, updated_at=datetime('now')
       WHERE id=?
     `).run(first_name, last_name, date_of_birth, gender, phone, email, address, insurance_provider, insurance_number, emergency_contact, emergency_phone, notes, req.params.id);
+    res.locals.audit('Updated patient', 'patient', req.params.id, `${first_name} ${last_name}`);
     res.redirect(`/patients/${req.params.id}`);
   } catch (err) {
     const patient = { id: req.params.id, ...req.body };

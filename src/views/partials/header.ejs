@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SimplyDiagnostic LIS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 </head>
 <body>
+  <button class="mobile-menu-btn">&#9776;</button>
   <div class="app">
     <nav class="sidebar">
       <div class="sidebar-header">
         <h2>SimplyDiagnostic</h2>
-        <span class="sidebar-subtitle">LIS</span>
+        <span class="sidebar-subtitle">Laboratory</span>
       </div>
       <ul class="nav-menu">
         <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
@@ -24,7 +28,10 @@
       <div class="sidebar-footer">
         <span class="user-name"><%= user.full_name %></span>
         <span class="user-role"><%= user.role %></span>
-        <a href="/logout" class="btn btn-sm btn-outline">Logout</a>
+        <div class="sidebar-actions">
+          <button class="theme-toggle">Dark Mode</button>
+          <a href="/logout" class="btn btn-sm btn-outline" style="color:#94a3b8;border-color:rgba(255,255,255,0.1)">Logout</a>
+        </div>
       </div>
     </nav>
     <main class="content">
