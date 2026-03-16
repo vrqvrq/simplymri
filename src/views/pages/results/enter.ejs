@@ -1,0 +1,44 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Enter Results - <%= order.order_number %></h1>
+  <a href="/orders/<%= order.id %>" class="btn btn-outline">Back to Order</a>
+</div>
+
+<div class="card">
+  <p><strong>Patient:</strong> <%= order.first_name %> <%= order.last_name %> (<%= order.pid %>)</p>
+</div>
+
+<div class="card">
+  <form method="POST" action="/results/save/<%= order.id %>">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Test</th>
+          <th>Result Value</th>
+          <th>Unit</th>
+          <th>Reference Range</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.forEach(function(r) { %>
+          <tr>
+            <td><strong><%= r.code %></strong> - <%= r.test_name %></td>
+            <td>
+              <input type="text" name="results[<%= r.id %>][value]" value="<%= r.result_value || '' %>" class="input-sm" placeholder="Enter value">
+            </td>
+            <td><%= r.test_unit || r.unit || '' %></td>
+            <td><%= r.reference_range || '' %></td>
+            <td>
+              <input type="text" name="results[<%= r.id %>][notes]" value="<%= r.notes || '' %>" class="input-sm" placeholder="Notes">
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <button type="submit" class="btn btn-primary">Save Results</button>
+  </form>
+</div>
+
+<%- include('../../partials/footer') %>

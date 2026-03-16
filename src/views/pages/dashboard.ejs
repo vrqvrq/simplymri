@@ -1,0 +1,66 @@
+<%- include('../partials/header') %>
+
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <a href="/orders/new" class="btn btn-primary">+ New Order</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-number"><%= stats.totalPatients %></div>
+    <div class="stat-label">Total Patients</div>
+  </div>
+  <div class="stat-card stat-warning">
+    <div class="stat-number"><%= stats.pendingOrders %></div>
+    <div class="stat-label">Pending Orders</div>
+  </div>
+  <div class="stat-card stat-success">
+    <div class="stat-number"><%= stats.completedToday %></div>
+    <div class="stat-label">Completed Today</div>
+  </div>
+  <div class="stat-card stat-danger">
+    <div class="stat-number"><%= stats.unpaidInvoices %></div>
+    <div class="stat-label">Unpaid Invoices</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-number"><%= stats.pendingSamples %></div>
+    <div class="stat-label">Pending Samples</div>
+  </div>
+  <div class="stat-card stat-success">
+    <div class="stat-number">$<%= stats.totalRevenue.toFixed(2) %></div>
+    <div class="stat-label">Total Revenue</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Recent Orders</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>Patient</th>
+        <th>Priority</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% recentOrders.forEach(function(o) { %>
+        <tr>
+          <td><strong><%= o.order_number %></strong></td>
+          <td><%= o.first_name %> <%= o.last_name %> (<%= o.pid %>)</td>
+          <td><span class="badge badge-<%= o.priority %>"><%= o.priority %></span></td>
+          <td><span class="badge badge-<%= o.status %>"><%= o.status %></span></td>
+          <td><%= o.created_at %></td>
+          <td><a href="/orders/<%= o.id %>" class="btn btn-sm">View</a></td>
+        </tr>
+      <% }); %>
+      <% if (recentOrders.length === 0) { %>
+        <tr><td colspan="6" class="text-center">No orders yet</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/footer') %>

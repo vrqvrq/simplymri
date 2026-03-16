@@ -1,0 +1,77 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1><%= patient.first_name %> <%= patient.last_name %></h1>
+  <div>
+    <a href="/orders/new?patient_id=<%= patient.id %>" class="btn btn-primary">+ New Order</a>
+    <a href="/patients/<%= patient.id %>/edit" class="btn btn-outline">Edit</a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="card">
+    <h3>Patient Information</h3>
+    <div class="detail-row"><strong>Patient ID:</strong> <%= patient.patient_id %></div>
+    <div class="detail-row"><strong>DOB:</strong> <%= patient.date_of_birth %></div>
+    <div class="detail-row"><strong>Gender:</strong> <%= patient.gender %></div>
+    <div class="detail-row"><strong>Phone:</strong> <%= patient.phone || '-' %></div>
+    <div class="detail-row"><strong>Email:</strong> <%= patient.email || '-' %></div>
+    <div class="detail-row"><strong>Address:</strong> <%= patient.address || '-' %></div>
+  </div>
+  <div class="card">
+    <h3>Insurance</h3>
+    <div class="detail-row"><strong>Provider:</strong> <%= patient.insurance_provider || '-' %></div>
+    <div class="detail-row"><strong>Number:</strong> <%= patient.insurance_number || '-' %></div>
+    <h3>Emergency Contact</h3>
+    <div class="detail-row"><strong>Name:</strong> <%= patient.emergency_contact || '-' %></div>
+    <div class="detail-row"><strong>Phone:</strong> <%= patient.emergency_phone || '-' %></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Lab Orders</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Order #</th><th>Tests</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(function(o) { %>
+        <tr>
+          <td><strong><%= o.order_number %></strong></td>
+          <td><%= o.test_count %> test(s)</td>
+          <td><span class="badge badge-<%= o.status %>"><%= o.status %></span></td>
+          <td><%= o.created_at %></td>
+          <td><a href="/orders/<%= o.id %>" class="btn btn-sm">View</a></td>
+        </tr>
+      <% }); %>
+      <% if (orders.length === 0) { %>
+        <tr><td colspan="5" class="text-center">No orders</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Invoices</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Invoice #</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% invoices.forEach(function(inv) { %>
+        <tr>
+          <td><strong><%= inv.invoice_number %></strong></td>
+          <td>$<%= inv.total.toFixed(2) %></td>
+          <td><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
+          <td><%= inv.created_at %></td>
+          <td><a href="/billing/<%= inv.id %>" class="btn btn-sm">View</a></td>
+        </tr>
+      <% }); %>
+      <% if (invoices.length === 0) { %>
+        <tr><td colspan="5" class="text-center">No invoices</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>

@@ -1,0 +1,58 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Billing</h1>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card stat-danger">
+    <div class="stat-number">$<%= totals.unpaid.toFixed(2) %></div>
+    <div class="stat-label">Unpaid</div>
+  </div>
+  <div class="stat-card stat-success">
+    <div class="stat-number">$<%= totals.paid.toFixed(2) %></div>
+    <div class="stat-label">Paid</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="filter-bar">
+    <a href="/billing" class="btn btn-sm <%= !status ? 'btn-primary' : 'btn-outline' %>">All</a>
+    <a href="/billing?status=unpaid" class="btn btn-sm <%= status === 'unpaid' ? 'btn-primary' : 'btn-outline' %>">Unpaid</a>
+    <a href="/billing?status=paid" class="btn btn-sm <%= status === 'paid' ? 'btn-primary' : 'btn-outline' %>">Paid</a>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Invoice #</th>
+        <th>Order #</th>
+        <th>Patient</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% invoices.forEach(function(inv) { %>
+        <tr>
+          <td><strong><%= inv.invoice_number %></strong></td>
+          <td><%= inv.order_number %></td>
+          <td><%= inv.first_name %> <%= inv.last_name %></td>
+          <td>$<%= inv.total.toFixed(2) %></td>
+          <td><span class="badge badge-<%= inv.status %>"><%= inv.status %></span></td>
+          <td><%= inv.created_at %></td>
+          <td><a href="/billing/<%= inv.id %>" class="btn btn-sm">View</a></td>
+        </tr>
+      <% }); %>
+      <% if (invoices.length === 0) { %>
+        <tr><td colspan="7" class="text-center">No invoices found</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>

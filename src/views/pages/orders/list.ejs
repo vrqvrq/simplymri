@@ -1,0 +1,50 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Lab Orders</h1>
+  <a href="/orders/new" class="btn btn-primary">+ New Order</a>
+</div>
+
+<div class="card">
+  <div class="filter-bar">
+    <a href="/orders" class="btn btn-sm <%= !status ? 'btn-primary' : 'btn-outline' %>">All</a>
+    <a href="/orders?status=pending" class="btn btn-sm <%= status === 'pending' ? 'btn-primary' : 'btn-outline' %>">Pending</a>
+    <a href="/orders?status=in_progress" class="btn btn-sm <%= status === 'in_progress' ? 'btn-primary' : 'btn-outline' %>">In Progress</a>
+    <a href="/orders?status=completed" class="btn btn-sm <%= status === 'completed' ? 'btn-primary' : 'btn-outline' %>">Completed</a>
+    <a href="/orders?status=verified" class="btn btn-sm <%= status === 'verified' ? 'btn-primary' : 'btn-outline' %>">Verified</a>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Order #</th>
+        <th>Patient</th>
+        <th>Physician</th>
+        <th>Priority</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% orders.forEach(function(o) { %>
+        <tr>
+          <td><strong><%= o.order_number %></strong></td>
+          <td><%= o.first_name %> <%= o.last_name %> (<%= o.pid %>)</td>
+          <td><%= o.ordering_physician || '-' %></td>
+          <td><span class="badge badge-<%= o.priority %>"><%= o.priority %></span></td>
+          <td><span class="badge badge-<%= o.status %>"><%= o.status %></span></td>
+          <td><%= o.created_at %></td>
+          <td><a href="/orders/<%= o.id %>" class="btn btn-sm">View</a></td>
+        </tr>
+      <% }); %>
+      <% if (orders.length === 0) { %>
+        <tr><td colspan="7" class="text-center">No orders found</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>

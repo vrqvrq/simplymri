@@ -1,0 +1,51 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Patients</h1>
+  <a href="/patients/new" class="btn btn-primary">+ New Patient</a>
+</div>
+
+<div class="card">
+  <form method="GET" action="/patients" class="search-form">
+    <input type="text" name="search" placeholder="Search by name, ID, or phone..." value="<%= search %>" class="search-input">
+    <button type="submit" class="btn btn-primary">Search</button>
+    <% if (search) { %><a href="/patients" class="btn btn-outline">Clear</a><% } %>
+  </form>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Patient ID</th>
+        <th>Name</th>
+        <th>DOB</th>
+        <th>Gender</th>
+        <th>Phone</th>
+        <th>Insurance</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% patients.forEach(function(p) { %>
+        <tr>
+          <td><strong><%= p.patient_id %></strong></td>
+          <td><%= p.first_name %> <%= p.last_name %></td>
+          <td><%= p.date_of_birth %></td>
+          <td><%= p.gender %></td>
+          <td><%= p.phone || '-' %></td>
+          <td><%= p.insurance_provider || '-' %></td>
+          <td>
+            <a href="/patients/<%= p.id %>" class="btn btn-sm">View</a>
+            <a href="/patients/<%= p.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (patients.length === 0) { %>
+        <tr><td colspan="7" class="text-center">No patients found</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>

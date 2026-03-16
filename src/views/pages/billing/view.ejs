@@ -1,0 +1,76 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Invoice <%= invoice.invoice_number %></h1>
+  <div>
+    <a href="/reports/invoice/<%= invoice.id %>" class="btn btn-outline" target="_blank">PDF</a>
+    <a href="/billing" class="btn btn-outline">Back</a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="card">
+    <h3>Invoice Details</h3>
+    <div class="detail-row"><strong>Invoice #:</strong> <%= invoice.invoice_number %></div>
+    <div class="detail-row"><strong>Order #:</strong> <a href="/orders/<%= invoice.order_id %>"><%= invoice.order_number %></a></div>
+    <div class="detail-row"><strong>Date:</strong> <%= invoice.created_at %></div>
+    <div class="detail-row"><strong>Status:</strong> <span class="badge badge-<%= invoice.status %>"><%= invoice.status %></span></div>
+    <% if (invoice.paid_at) { %>
+      <div class="detail-row"><strong>Paid:</strong> <%= invoice.paid_at %> (<%= invoice.payment_method %>)</div>
+    <% } %>
+  </div>
+  <div class="card">
+    <h3>Patient</h3>
+    <div class="detail-row"><strong>Name:</strong> <%= invoice.first_name %> <%= invoice.last_name %></div>
+    <div class="detail-row"><strong>ID:</strong> <%= invoice.pid %></div>
+    <div class="detail-row"><strong>Phone:</strong> <%= invoice.phone || '-' %></div>
+    <div class="detail-row"><strong>Insurance:</strong> <%= invoice.insurance_provider || '-' %></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Line Items</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <% items.forEach(function(item) { %>
+        <tr>
+          <td><%= item.description %></td>
+          <td><%= item.quantity %></td>
+          <td>$<%= item.unit_price.toFixed(2) %></td>
+          <td>$<%= item.total.toFixed(2) %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+    <tfoot>
+      <tr><td colspan="3" class="text-right"><strong>Subtotal:</strong></td><td>$<%= invoice.subtotal.toFixed(2) %></td></tr>
+      <tr><td colspan="3" class="text-right"><strong>Tax:</strong></td><td>$<%= invoice.tax.toFixed(2) %></td></tr>
+      <tr><td colspan="3" class="text-right"><strong>Discount:</strong></td><td>-$<%= invoice.discount.toFixed(2) %></td></tr>
+      <tr><td colspan="3" class="text-right"><strong>Total:</strong></td><td><strong>$<%= invoice.total.toFixed(2) %></strong></td></tr>
+    </tfoot>
+  </table>
+</div>
+
+<% if (invoice.status === 'unpaid') { %>
+  <div class="card">
+    <h3>Record Payment</h3>
+    <form method="POST" action="/billing/<%= invoice.id %>/pay">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select name="payment_method">
+            <option value="cash">Cash</option>
+            <option value="card">Card</option>
+            <option value="insurance">Insurance</option>
+            <option value="bank_transfer">Bank Transfer</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-success">Mark as Paid</button>
+    </form>
+  </div>
+<% } %>
+
+<%- include('../../partials/footer') %>

@@ -1,0 +1,88 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Settings</h1>
+</div>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-error"><%= error %></div>
+<% } %>
+
+<div class="card">
+  <h2>Change Password</h2>
+  <form method="POST" action="/settings/change-password">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Current Password</label>
+        <input type="password" name="current_password" required>
+      </div>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" name="new_password" required minlength="6">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Change Password</button>
+  </form>
+</div>
+
+<% if (user.role === 'admin') { %>
+<div class="card">
+  <h2>Users</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% users.forEach(function(u) { %>
+        <tr>
+          <td><%= u.username %></td>
+          <td><%= u.full_name %></td>
+          <td><%= u.role %></td>
+          <td><span class="badge badge-<%= u.active ? 'completed' : 'stat' %>"><%= u.active ? 'Active' : 'Inactive' %></span></td>
+          <td>
+            <form method="POST" action="/settings/users/<%= u.id %>/toggle" style="display:inline">
+              <button type="submit" class="btn btn-sm btn-outline"><%= u.active ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <h3>Add User</h3>
+  <form method="POST" action="/settings/users">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" required>
+      </div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" name="full_name" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required minlength="6">
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <select name="role">
+          <option value="technician">Technician</option>
+          <option value="pathologist">Pathologist</option>
+          <option value="receptionist">Receptionist</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" name="email">
+    </div>
+    <button type="submit" class="btn btn-primary">Add User</button>
+  </form>
+</div>
+<% } %>
+
+<%- include('../../partials/footer') %>

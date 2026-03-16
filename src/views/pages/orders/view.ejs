@@ -1,0 +1,98 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Order <%= order.order_number %></h1>
+  <div>
+    <% if (order.status === 'pending' || order.status === 'in_progress') { %>
+      <a href="/results/enter/<%= order.id %>" class="btn btn-primary">Enter Results</a>
+    <% } %>
+    <% if (order.status === 'completed') { %>
+      <form method="POST" action="/results/verify/<%= order.id %>" style="display:inline">
+        <button type="submit" class="btn btn-success">Verify Results</button>
+      </form>
+    <% } %>
+    <% if (!invoice) { %>
+      <form method="POST" action="/billing/generate/<%= order.id %>" style="display:inline">
+        <button type="submit" class="btn btn-outline">Generate Invoice</button>
+      </form>
+    <% } else { %>
+      <a href="/billing/<%= invoice.id %>" class="btn btn-outline">View Invoice</a>
+    <% } %>
+    <a href="/reports/lab-report/<%= order.id %>" class="btn btn-outline" target="_blank">PDF Report</a>
+    <a href="/orders" class="btn btn-outline">Back</a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="card">
+    <h3>Order Details</h3>
+    <div class="detail-row"><strong>Status:</strong> <span class="badge badge-<%= order.status %>"><%= order.status %></span></div>
+    <div class="detail-row"><strong>Priority:</strong> <span class="badge badge-<%= order.priority %>"><%= order.priority %></span></div>
+    <div class="detail-row"><strong>Physician:</strong> <%= order.ordering_physician || '-' %></div>
+    <div class="detail-row"><strong>Date:</strong> <%= order.created_at %></div>
+    <% if (order.clinical_notes) { %>
+      <div class="detail-row"><strong>Notes:</strong> <%= order.clinical_notes %></div>
+    <% } %>
+  </div>
+  <div class="card">
+    <h3>Patient</h3>
+    <div class="detail-row"><strong>Name:</strong> <a href="/patients/<%= order.patient_id %>"><%= order.first_name %> <%= order.last_name %></a></div>
+    <div class="detail-row"><strong>ID:</strong> <%= order.pid %></div>
+    <div class="detail-row"><strong>DOB:</strong> <%= order.date_of_birth %></div>
+    <div class="detail-row"><strong>Gender:</strong> <%= order.gender %></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Samples</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Sample ID</th><th>Type</th><th>Collected</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <% samples.forEach(function(s) { %>
+        <tr>
+          <td><strong><%= s.sample_id %></strong></td>
+          <td><%= s.sample_type %></td>
+          <td><%= s.collection_date %></td>
+          <td><span class="badge badge-<%= s.status %>"><%= s.status %></span></td>
+          <td>
+            <% if (s.status === 'collected') { %>
+              <form method="POST" action="/samples/<%= s.id %>/status" style="display:inline">
+                <input type="hidden" name="status" value="processing">
+                <button type="submit" class="btn btn-sm">Start Processing</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>Test Results</h2>
+  <table class="table">
+    <thead>
+      <tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference Range</th><th>Flag</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <% results.forEach(function(r) { %>
+        <tr class="<%= r.flag === 'HIGH' || r.flag === 'LOW' ? 'row-abnormal' : '' %>">
+          <td><strong><%= r.code %></strong> - <%= r.test_name %></td>
+          <td><%= r.result_value || '-' %></td>
+          <td><%= r.unit || '' %></td>
+          <td><%= r.reference_range || '' %></td>
+          <td>
+            <% if (r.flag) { %>
+              <span class="badge badge-<%= r.flag === 'NORMAL' ? 'completed' : 'stat' %>"><%= r.flag %></span>
+            <% } %>
+          </td>
+          <td><span class="badge badge-<%= r.status %>"><%= r.status %></span></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>
