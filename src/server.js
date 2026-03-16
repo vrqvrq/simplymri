@@ -38,6 +38,7 @@ app.use('/codes', require('./routes/barcodes'));
 app.use('/physicians', require('./routes/physicians'));
 app.use('/worklist', require('./routes/worklist'));
 app.use('/panels', require('./routes/panels'));
+app.use('/tests', require('./routes/tests'));
 
 // Error handler
 app.use((err, req, res, next) => {

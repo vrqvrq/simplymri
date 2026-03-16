@@ -1,0 +1,62 @@
+<%- include('../../partials/header') %>
+
+<div class="page-header">
+  <h1>Test Catalog</h1>
+  <div class="page-header-actions">
+    <a href="/tests/new" class="btn btn-primary">+ Add Test</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="filter-bar">
+    <a href="/tests" class="btn btn-sm <%= !category ? 'btn-primary' : 'btn-outline' %>">All</a>
+    <% categories.forEach(function(cat) { %>
+      <a href="/tests?category=<%= encodeURIComponent(cat) %>" class="btn btn-sm <%= category === cat ? 'btn-primary' : 'btn-outline' %>"><%= cat %></a>
+    <% }); %>
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Sample Type</th>
+        <th>Unit</th>
+        <th>Reference Range</th>
+        <th>Price</th>
+        <th>TAT (hrs)</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% tests.forEach(function(t) { %>
+        <tr style="<%= t.active ? '' : 'opacity:0.5' %>">
+          <td><strong><%= t.code %></strong></td>
+          <td><%= t.name %></td>
+          <td><%= t.category %></td>
+          <td><%= t.sample_type %></td>
+          <td><%= t.unit || '-' %></td>
+          <td><%= t.reference_range_text || '-' %></td>
+          <td>$<%= t.price.toFixed(2) %></td>
+          <td><%= t.turnaround_hours %></td>
+          <td><span class="badge badge-<%= t.active ? 'completed' : 'stat' %>"><%= t.active ? 'Active' : 'Inactive' %></span></td>
+          <td>
+            <a href="/tests/<%= t.id %>/edit" class="btn btn-sm btn-outline">Edit</a>
+            <form method="POST" action="/tests/<%= t.id %>/toggle" style="display:inline">
+              <button type="submit" class="btn btn-sm"><%= t.active ? 'Deactivate' : 'Activate' %></button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (tests.length === 0) { %>
+        <tr><td colspan="10" class="text-center">No tests found</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../../partials/footer') %>

@@ -305,6 +305,18 @@ const tests = [
   ['CRP', 'C-Reactive Protein', 'Immunology', 'Inflammation marker', 'Blood (Serum)', 'mg/L', 0, 10, '<10 mg/L normal', 20.00, 6],
   ['TSH', 'Thyroid Stimulating Hormone', 'Immunology', 'Thyroid function test', 'Blood (Serum)', 'mIU/L', 0.4, 4.0, '0.4-4.0 mIU/L', 25.00, 8],
   ['HBA1C', 'Hemoglobin A1c', 'Immunology', 'Glycated hemoglobin - diabetes marker', 'Blood (EDTA)', '%', 4.0, 5.6, '<5.7% normal', 30.00, 8],
+
+  // Genetics
+  ['BRCA', 'BRCA1/BRCA2 Gene Panel', 'Genetics', 'Breast/ovarian cancer risk gene analysis', 'Blood (EDTA)', null, null, null, 'Positive/Negative for pathogenic variants', 350.00, 336],
+  ['KARYO', 'Karyotype Analysis', 'Genetics', 'Chromosome analysis for structural abnormalities', 'Blood (EDTA)', null, null, null, '46,XX or 46,XY normal', 250.00, 504],
+  ['CF-GENE', 'Cystic Fibrosis Gene Panel', 'Genetics', 'CFTR gene mutation screening', 'Blood (EDTA)', null, null, null, 'Carrier/Non-carrier', 200.00, 336],
+  ['SCD', 'Sickle Cell Gene Test', 'Genetics', 'HBB gene analysis for sickle cell variants', 'Blood (EDTA)', null, null, null, 'HbAA normal / HbAS carrier / HbSS disease', 120.00, 168],
+  ['THAL', 'Thalassemia Gene Panel', 'Genetics', 'Alpha and beta thalassemia gene analysis', 'Blood (EDTA)', null, null, null, 'Normal/Carrier/Affected', 180.00, 336],
+  ['PHAR', 'Pharmacogenomics Panel', 'Genetics', 'Drug metabolism gene variants (CYP450, DPYD, etc.)', 'Blood (EDTA)', null, null, null, 'See individual gene results', 300.00, 336],
+  ['NIPT', 'Non-Invasive Prenatal Testing', 'Genetics', 'Cell-free DNA screening for trisomy 13, 18, 21', 'Blood (EDTA)', null, null, null, 'Low risk / High risk', 400.00, 168],
+  ['FH-GENE', 'Familial Hypercholesterolemia Panel', 'Genetics', 'LDLR, APOB, PCSK9 gene analysis', 'Blood (EDTA)', null, null, null, 'Positive/Negative for pathogenic variants', 280.00, 336],
+  ['LYNCH', 'Lynch Syndrome Panel', 'Genetics', 'MLH1, MSH2, MSH6, PMS2 gene analysis', 'Genetics', null, null, null, 'Positive/Negative for pathogenic variants', 320.00, 336],
+  ['WES', 'Whole Exome Sequencing', 'Genetics', 'Comprehensive exome analysis for rare genetic disorders', 'Blood (EDTA)', null, null, null, 'See detailed report', 800.00, 672],
 ];
 
 const insertTests = db.transaction(() => {
