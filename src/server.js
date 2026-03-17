@@ -1,26 +1,66 @@
+const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { auditMiddleware } = require('./middleware/audit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Generate a random session secret if not provided (log warning)
+const SESSION_SECRET = process.env.SESSION_SECRET || (() => {
+  console.warn('WARNING: SESSION_SECRET not set. Using random secret — sessions will not persist across restarts. Set SESSION_SECRET env var in production.');
+  return crypto.randomBytes(32).toString('hex');
+})();
+
+// Security headers
+app.use(helmet({
+  contentSecurityPolicy: false // Allow inline scripts used by EJS templates
+}));
+
+// Rate limiting — general API
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use(generalLimiter);
+
+// Rate limiting — auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 15,
+  message: 'Too many login attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'simplydiagnostic-lis-secret-key-change-in-production',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 8 * 60 * 60 * 1000 } // 8 hours
+  cookie: {
+    maxAge: 8 * 60 * 60 * 1000, // 8 hours
+    httpOnly: true,
+    sameSite: 'lax'
+  }
 }));
 app.use(auditMiddleware);
 
 // View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+
+// Apply auth rate limiter to login routes
+app.use('/login', authLimiter);
+app.use('/portal/login', authLimiter);
 
 // Routes
 app.use('/', require('./routes/auth'));

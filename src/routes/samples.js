@@ -34,7 +34,10 @@ router.post('/:id/status', requireAuth, (req, res) => {
     db.prepare("UPDATE lab_orders SET status = 'in_progress', updated_at = datetime('now') WHERE id = ? AND status = 'pending'").run(sample.order_id);
   }
 
-  res.redirect(req.get('Referer') || '/samples');
+  // Only allow internal redirects to prevent open redirect
+  const referer = req.get('Referer') || '';
+  const refererPath = referer ? new URL(referer, `http://${req.headers.host}`).pathname : '/samples';
+  res.redirect(refererPath);
 });
 
 module.exports = router;

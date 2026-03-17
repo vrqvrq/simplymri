@@ -204,35 +204,51 @@ router.post('/notifications/read-all', requireAuth, (req, res) => {
 // Summary reports data
 router.get('/summary-report', requireAuth, (req, res) => {
   const period = req.query.period || 'today';
-  let dateFilter;
+  let daysBack;
   switch (period) {
-    case 'today': dateFilter = "date('now')"; break;
-    case 'week': dateFilter = "date('now', '-7 days')"; break;
-    case 'month': dateFilter = "date('now', '-30 days')"; break;
-    case 'year': dateFilter = "date('now', '-365 days')"; break;
-    default: dateFilter = "date('now')";
+    case 'today': daysBack = 0; break;
+    case 'week': daysBack = 7; break;
+    case 'month': daysBack = 30; break;
+    case 'year': daysBack = 365; break;
+    default: daysBack = 0;
   }
+
+  // Compute cutoff date in JS to avoid SQL string interpolation
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - daysBack);
+  const dateParam = cutoff.toISOString().split('T')[0];
 
   const report = {
     period,
     orders: {
-      total: db.prepare(`SELECT COUNT(*) as c FROM lab_orders WHERE date(created_at) >= ${dateFilter}`).get().c,
-      byStatus: db.prepare(`SELECT status, COUNT(*) as count FROM lab_orders WHERE date(created_at) >= ${dateFilter} GROUP BY status`).all(),
-      byPriority: db.prepare(`SELECT priority, COUNT(*) as count FROM lab_orders WHERE date(created_at) >= ${dateFilter} GROUP BY priority`).all()
+      total: db.prepare(`SELECT COUNT(*) as c FROM lab_orders WHERE date(created_at) >= ?`)
+        .get(dateParam).c,
+      byStatus: db.prepare(`SELECT status, COUNT(*) as count FROM lab_orders WHERE date(created_at) >= ? GROUP BY status`)
+        .all(dateParam),
+      byPriority: db.prepare(`SELECT priority, COUNT(*) as count FROM lab_orders WHERE date(created_at) >= ? GROUP BY priority`)
+        .all(dateParam)
     },
     tests: {
-      total: db.prepare(`SELECT COUNT(*) as c FROM test_results tr JOIN lab_orders lo ON tr.order_id = lo.id WHERE date(lo.created_at) >= ${dateFilter}`).get().c,
-      completed: db.prepare(`SELECT COUNT(*) as c FROM test_results tr JOIN lab_orders lo ON tr.order_id = lo.id WHERE tr.status IN ('completed','verified') AND date(lo.created_at) >= ${dateFilter}`).get().c,
-      abnormal: db.prepare(`SELECT COUNT(*) as c FROM test_results tr JOIN lab_orders lo ON tr.order_id = lo.id WHERE tr.flag IN ('HIGH','LOW') AND date(lo.created_at) >= ${dateFilter}`).get().c,
-      byCategory: db.prepare(`SELECT tc.category, COUNT(*) as count FROM test_results tr JOIN test_catalog tc ON tr.test_id = tc.id JOIN lab_orders lo ON tr.order_id = lo.id WHERE date(lo.created_at) >= ${dateFilter} GROUP BY tc.category`).all()
+      total: db.prepare(`SELECT COUNT(*) as c FROM test_results tr JOIN lab_orders lo ON tr.order_id = lo.id WHERE date(lo.created_at) >= ?`)
+        .get(dateParam).c,
+      completed: db.prepare(`SELECT COUNT(*) as c FROM test_results tr JOIN lab_orders lo ON tr.order_id = lo.id WHERE tr.status IN ('completed','verified') AND date(lo.created_at) >= ?`)
+        .get(dateParam).c,
+      abnormal: db.prepare(`SELECT COUNT(*) as c FROM test_results tr JOIN lab_orders lo ON tr.order_id = lo.id WHERE tr.flag IN ('HIGH','LOW') AND date(lo.created_at) >= ?`)
+        .get(dateParam).c,
+      byCategory: db.prepare(`SELECT tc.category, COUNT(*) as count FROM test_results tr JOIN test_catalog tc ON tr.test_id = tc.id JOIN lab_orders lo ON tr.order_id = lo.id WHERE date(lo.created_at) >= ? GROUP BY tc.category`)
+        .all(dateParam)
     },
     revenue: {
-      total: db.prepare(`SELECT COALESCE(SUM(total), 0) as t FROM invoices WHERE date(created_at) >= ${dateFilter}`).get().t,
-      paid: db.prepare(`SELECT COALESCE(SUM(total), 0) as t FROM invoices WHERE status = 'paid' AND date(created_at) >= ${dateFilter}`).get().t,
-      unpaid: db.prepare(`SELECT COALESCE(SUM(total), 0) as t FROM invoices WHERE status = 'unpaid' AND date(created_at) >= ${dateFilter}`).get().t
+      total: db.prepare(`SELECT COALESCE(SUM(total), 0) as t FROM invoices WHERE date(created_at) >= ?`)
+        .get(dateParam).t,
+      paid: db.prepare(`SELECT COALESCE(SUM(total), 0) as t FROM invoices WHERE status = 'paid' AND date(created_at) >= ?`)
+        .get(dateParam).t,
+      unpaid: db.prepare(`SELECT COALESCE(SUM(total), 0) as t FROM invoices WHERE status = 'unpaid' AND date(created_at) >= ?`)
+        .get(dateParam).t
     },
     patients: {
-      newPatients: db.prepare(`SELECT COUNT(*) as c FROM patients WHERE date(created_at) >= ${dateFilter}`).get().c
+      newPatients: db.prepare(`SELECT COUNT(*) as c FROM patients WHERE date(created_at) >= ?`)
+        .get(dateParam).c
     },
     tat: db.prepare(`
       SELECT tc.name, tc.turnaround_hours as target,
@@ -243,9 +259,9 @@ router.get('/summary-report', requireAuth, (req, res) => {
       FROM test_results tr
       JOIN test_catalog tc ON tr.test_id = tc.id
       JOIN lab_orders lo ON tr.order_id = lo.id
-      WHERE tr.performed_at IS NOT NULL AND date(lo.created_at) >= ${dateFilter}
+      WHERE tr.performed_at IS NOT NULL AND date(lo.created_at) >= ?
       GROUP BY tr.test_id ORDER BY count DESC
-    `).all()
+    `).all(dateParam)
   };
 
   res.json(report);

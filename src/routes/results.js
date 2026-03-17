@@ -91,7 +91,8 @@ router.post('/save/:orderId', requireAuth, (req, res) => {
     res.locals.audit('Entered results', 'order', req.params.orderId, `${Object.keys(results).length} results saved`);
     res.redirect(`/orders/${req.params.orderId}`);
   } catch (err) {
-    res.redirect(`/results/enter/${req.params.orderId}?error=${encodeURIComponent(err.message)}`);
+    console.error('Error saving results:', err.message);
+    res.redirect(`/results/enter/${req.params.orderId}?error=Failed+to+save+results`);
   }
 });
 

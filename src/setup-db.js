@@ -22,6 +22,7 @@ db.exec(`
     role TEXT NOT NULL DEFAULT 'technician',
     email TEXT,
     active INTEGER DEFAULT 1,
+    force_password_change INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
   );
 
@@ -263,13 +264,13 @@ db.exec(`
   );
 `);
 
-// Seed default admin user
+// Seed default admin user (force_password_change = 1 so admin must change password on first login)
 const hashedPassword = bcrypt.hashSync('admin123', 10);
 const insertUser = db.prepare(`
-  INSERT OR IGNORE INTO users (username, password, full_name, role, email)
-  VALUES (?, ?, ?, ?, ?)
+  INSERT OR IGNORE INTO users (username, password, full_name, role, email, force_password_change)
+  VALUES (?, ?, ?, ?, ?, ?)
 `);
-insertUser.run('admin', hashedPassword, 'System Administrator', 'admin', 'admin@lab.com');
+insertUser.run('admin', hashedPassword, 'System Administrator', 'admin', 'admin@lab.com', 1);
 
 // Seed test catalog
 const insertTest = db.prepare(`

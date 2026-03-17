@@ -75,7 +75,8 @@ router.post('/generate/:orderId', requireAuth, (req, res) => {
     res.locals.audit('Generated invoice', 'invoice', String(invoiceId), `Order ${order.order_number}`);
     res.redirect(`/billing/${invoiceId}`);
   } catch (err) {
-    res.redirect(`/orders/${req.params.orderId}?error=${encodeURIComponent(err.message)}`);
+    console.error('Error generating invoice:', err.message);
+    res.redirect(`/orders/${req.params.orderId}?error=Failed+to+generate+invoice`);
   }
 });
 
