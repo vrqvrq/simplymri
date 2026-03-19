@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= study.body_part %> MRI - <%= study.study_id %> - SimplyMRI Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav-inner">
+      <a href="/portal" class="portal-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        SimplyMRI
+      </a>
+      <div class="portal-nav-links">
+        <a href="/portal" class="portal-nav-link">Dashboard</a>
+        <a href="/portal/mri" class="portal-nav-link active">MRI Studies</a>
+        <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
+        <a href="/portal/profile" class="portal-nav-link">Profile</a>
+      </div>
+      <div class="portal-nav-user">
+        <span class="portal-user-name"><%= patient.first_name %> <%= patient.last_name %></span>
+        <a href="/portal/logout" class="portal-btn portal-btn-outline portal-btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="portal-container">
+    <div class="portal-breadcrumb">
+      <a href="/portal" class="portal-link">Dashboard</a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <a href="/portal/mri" class="portal-link">MRI Studies</a>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      <span><%= study.study_id %></span>
+    </div>
+
+    <!-- Study Header -->
+    <div class="mri-detail-header">
+      <div class="mri-detail-header-info">
+        <div class="mri-detail-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+        </div>
+        <div>
+          <h1><%= study.body_part %> <%= study.modality %></h1>
+          <div class="mri-detail-meta">
+            <span class="order-status status-<%= study.status %>"><%= study.status.replace('_', ' ') %></span>
+            <span><%= study.study_id %></span>
+            <span>Contrast: <%= study.contrast %></span>
+            <% if (study.ordering_physician) { %><span>Ordered by: <%= study.ordering_physician %></span><% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Study Info Cards -->
+    <div class="mri-info-row">
+      <div class="mri-info-card">
+        <div class="mri-info-label">Scheduled Date</div>
+        <div class="mri-info-value"><%= study.scheduled_date ? new Date(study.scheduled_date).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }) : 'TBD' %></div>
+      </div>
+      <div class="mri-info-card">
+        <div class="mri-info-label">Performed Date</div>
+        <div class="mri-info-value"><%= study.performed_date ? new Date(study.performed_date).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' }) : 'Not yet' %></div>
+      </div>
+      <div class="mri-info-card">
+        <div class="mri-info-label">Scanner</div>
+        <div class="mri-info-value"><%= study.scanner || 'Not recorded' %></div>
+      </div>
+      <div class="mri-info-card">
+        <div class="mri-info-label">Images</div>
+        <div class="mri-info-value"><%= images.length %> image<%= images.length !== 1 ? 's' : '' %> in <%= series.length %> series</div>
+      </div>
+    </div>
+
+    <% if (study.clinical_indication) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Clinical Indication
+      </h2>
+      <div class="portal-notes">
+        <p><%= study.clinical_indication %></p>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Radiology Report -->
+    <% if (report) { %>
+    <div class="portal-section mri-report-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Radiology Report
+        <span class="mri-badge mri-badge-report" style="margin-left: 8px;">Final Report</span>
+      </h2>
+
+      <% if (report.technique) { %>
+      <div class="mri-report-block">
+        <h3 class="mri-report-block-title">Technique</h3>
+        <p class="mri-report-block-text"><%= report.technique %></p>
+      </div>
+      <% } %>
+
+      <% if (report.comparison) { %>
+      <div class="mri-report-block">
+        <h3 class="mri-report-block-title">Comparison</h3>
+        <p class="mri-report-block-text"><%= report.comparison %></p>
+      </div>
+      <% } %>
+
+      <% if (report.findings) { %>
+      <div class="mri-report-block">
+        <h3 class="mri-report-block-title">Findings</h3>
+        <p class="mri-report-block-text"><%= report.findings %></p>
+      </div>
+      <% } %>
+
+      <% if (report.impression) { %>
+      <div class="mri-report-block mri-report-impression">
+        <h3 class="mri-report-block-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Impression
+        </h3>
+        <p class="mri-report-block-text"><%= report.impression %></p>
+      </div>
+      <% } %>
+
+      <% if (report.recommendations) { %>
+      <div class="mri-report-block mri-report-recommendations">
+        <h3 class="mri-report-block-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Recommendations
+        </h3>
+        <p class="mri-report-block-text"><%= report.recommendations %></p>
+      </div>
+      <% } %>
+
+      <div class="mri-report-signature">
+        <div class="mri-report-signature-line">
+          <strong><%= report.radiologist || 'Radiologist' %></strong>
+        </div>
+        <div class="mri-report-signature-date">
+          Report finalized: <%= report.verified_at ? new Date(report.verified_at).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : '-' %>
+        </div>
+      </div>
+    </div>
+    <% } else if (study.status === 'completed') { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Radiology Report
+      </h2>
+      <div class="portal-empty-state">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <p>Your radiology report is being prepared by the radiologist. You will be able to view it here once it is finalized.</p>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- Image Series -->
+    <% if (series.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Image Series (<%= images.length %> images)
+      </h2>
+
+      <div class="mri-series-grid">
+        <% series.forEach(s => { %>
+          <div class="mri-series-card">
+            <div class="mri-series-header">
+              <div class="mri-series-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+              </div>
+              <div>
+                <h3 class="mri-series-title">Series <%= s.number %>: <%= s.description %></h3>
+                <span class="mri-series-meta"><%= s.images.length %> image<%= s.images.length !== 1 ? 's' : '' %> &middot; <%= s.images[0].slice_thickness || '-' %> slice thickness</span>
+              </div>
+            </div>
+            <div class="mri-image-grid">
+              <% s.images.forEach(img => { %>
+                <div class="mri-image-tile">
+                  <div class="mri-image-placeholder">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </div>
+                  <div class="mri-image-label">
+                    <span class="mri-image-name"><%= img.series_description %></span>
+                    <span class="mri-image-num">#<%= img.image_number %></span>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div class="portal-info-box" style="margin-top: 20px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div>
+          <strong>About MRI Images</strong>
+          <p>MRI images shown here are references to your DICOM imaging files. For full diagnostic-quality image viewing, your physician may access these through the PACS system. Contact the imaging center if you need copies of your images on CD/DVD.</p>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (study.notes) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Additional Notes
+      </h2>
+      <div class="portal-notes">
+        <p><%= study.notes %></p>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="portal-back-link">
+      <a href="/portal/mri" class="portal-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to MRI Studies
+      </a>
+    </div>
+  </div>
+
+  <footer class="portal-footer">
+    <p>&copy; <%= new Date().getFullYear() %> SimplyMRI Imaging Center. All rights reserved.</p>
+  </footer>
+</body>
+</html>

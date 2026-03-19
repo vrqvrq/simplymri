@@ -1,0 +1,91 @@
+<% const title = 'New MRI Study' %>
+<%- include('../../layouts/main', { body: `
+<div class="page-header">
+  <div>
+    <h1>New MRI Study</h1>
+    <p>Schedule a new MRI imaging study</p>
+  </div>
+  <a href="/mri" class="btn btn-outline">Back to Studies</a>
+</div>
+
+${error ? `<div class="alert alert-error">${error}</div>` : ''}
+
+<form method="POST" action="/mri" class="form-card">
+  <div class="form-row">
+    <div class="form-group">
+      <label>Patient *</label>
+      <select name="patient_id" required>
+        <option value="">Select Patient</option>
+        ${patients.map(p => `<option value="${p.id}" ${study && study.patient_id == p.id ? 'selected' : ''}>${p.last_name}, ${p.first_name} (${p.patient_id})</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Ordering Physician</label>
+      <input type="text" name="ordering_physician" value="${study ? study.ordering_physician || '' : ''}" placeholder="Dr. Name">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Body Part *</label>
+      <select name="body_part" required>
+        <option value="">Select Body Part</option>
+        ${['Brain', 'Cervical Spine', 'Thoracic Spine', 'Lumbar Spine', 'Shoulder', 'Elbow', 'Wrist', 'Hip', 'Knee', 'Ankle', 'Foot', 'Abdomen', 'Pelvis', 'Chest', 'Cardiac', 'Breast', 'Other'].map(bp => `<option value="${bp}" ${study && study.body_part === bp ? 'selected' : ''}>${bp}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Modality</label>
+      <select name="modality">
+        <option value="MRI">MRI</option>
+        <option value="MRA">MRA</option>
+        <option value="fMRI">fMRI</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Contrast</label>
+      <select name="contrast">
+        <option value="without">Without Contrast</option>
+        <option value="with">With Contrast</option>
+        <option value="with and without">With and Without Contrast</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Priority</label>
+      <select name="priority">
+        <option value="routine">Routine</option>
+        <option value="urgent">Urgent</option>
+        <option value="stat">STAT</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label>Scheduled Date</label>
+      <input type="date" name="scheduled_date" value="${study ? study.scheduled_date || '' : ''}">
+    </div>
+    <div class="form-group">
+      <label>Scanner</label>
+      <input type="text" name="scanner" value="${study ? study.scanner || '' : ''}" placeholder="e.g., Siemens MAGNETOM Vida 3T">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Clinical Indication *</label>
+    <textarea name="clinical_indication" rows="3" required placeholder="Clinical history and reason for exam">${study ? study.clinical_indication || '' : ''}</textarea>
+  </div>
+
+  <div class="form-group">
+    <label>Notes</label>
+    <textarea name="notes" rows="2" placeholder="Additional notes">${study ? study.notes || '' : ''}</textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Create MRI Study</button>
+    <a href="/mri" class="btn btn-outline">Cancel</a>
+  </div>
+</form>
+` }) %>

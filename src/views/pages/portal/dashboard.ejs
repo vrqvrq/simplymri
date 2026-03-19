@@ -18,6 +18,7 @@
       </a>
       <div class="portal-nav-links">
         <a href="/portal" class="portal-nav-link active">Dashboard</a>
+        <a href="/portal/mri" class="portal-nav-link">MRI Studies</a>
         <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
         <a href="/portal/education" class="portal-nav-link">Education</a>
         <a href="/portal/profile" class="portal-nav-link">Profile</a>
@@ -238,6 +239,46 @@
             <a href="/portal/invoices" class="portal-link">View All Invoices</a>
           </div>
         <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- MRI Studies -->
+    <% if (mriStudies && mriStudies.length > 0) { %>
+    <div class="portal-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+        MRI Studies
+      </h2>
+      <div class="portal-cards">
+        <% mriStudies.forEach(s => { %>
+          <div class="portal-order-card <%= s.status === 'completed' ? 'completed' : 'pending' %>">
+            <div class="order-card-header">
+              <span class="order-number"><%= s.study_id %></span>
+              <% if (s.report_status === 'final') { %>
+                <span class="mri-badge mri-badge-report">Report Ready</span>
+              <% } else { %>
+                <span class="order-status status-<%= s.status %>"><%= s.status.replace('_', ' ') %></span>
+              <% } %>
+            </div>
+            <div class="order-card-body">
+              <div class="mri-study-body-part"><%= s.body_part %> <%= s.modality %></div>
+              <div class="order-meta">
+                <span>Contrast: <%= s.contrast %></span>
+                <span><%= s.performed_date ? 'Performed: ' + new Date(s.performed_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Scheduled: ' + (s.scheduled_date ? new Date(s.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD') %></span>
+              </div>
+            </div>
+            <div class="order-card-actions">
+              <a href="/portal/mri/<%= s.id %>" class="portal-btn portal-btn-sm portal-btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <div style="margin-top: 16px; text-align: center;">
+        <a href="/portal/mri" class="portal-link">View All MRI Studies</a>
       </div>
     </div>
     <% } %>

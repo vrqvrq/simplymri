@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My MRI Studies - SimplyMRI Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/portal.css">
+</head>
+<body>
+  <nav class="portal-nav">
+    <div class="portal-nav-inner">
+      <a href="/portal" class="portal-logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+        SimplyMRI
+      </a>
+      <div class="portal-nav-links">
+        <a href="/portal" class="portal-nav-link">Dashboard</a>
+        <a href="/portal/mri" class="portal-nav-link active">MRI Studies</a>
+        <a href="/portal/invoices" class="portal-nav-link">Invoices</a>
+        <a href="/portal/profile" class="portal-nav-link">Profile</a>
+      </div>
+      <div class="portal-nav-user">
+        <span class="portal-user-name"><%= patient.first_name %> <%= patient.last_name %></span>
+        <a href="/portal/logout" class="portal-btn portal-btn-outline portal-btn-sm">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="portal-container">
+    <div class="portal-page-header">
+      <h1>My MRI Studies</h1>
+      <p>View your MRI imaging studies, reports, and images</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="portal-stats" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 32px;">
+      <div class="portal-stat-card">
+        <div class="stat-icon" style="background: rgba(99,102,241,0.08); color: #6366f1;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= studies.length %></span>
+          <span class="stat-label">Total Studies</span>
+        </div>
+      </div>
+      <div class="portal-stat-card">
+        <div class="stat-icon" style="background: rgba(16,185,129,0.1); color: #10b981;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= studies.filter(s => s.report_status === 'final').length %></span>
+          <span class="stat-label">Reports Ready</span>
+        </div>
+      </div>
+      <div class="portal-stat-card">
+        <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: #f59e0b;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number"><%= studies.filter(s => s.status === 'scheduled').length %></span>
+          <span class="stat-label">Upcoming</span>
+        </div>
+      </div>
+    </div>
+
+    <% if (studies.length === 0) { %>
+      <div class="portal-empty-hero">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+        <h3>No MRI studies yet</h3>
+        <p>Your MRI imaging studies will appear here once they are scheduled or completed.</p>
+      </div>
+    <% } else { %>
+      <!-- Upcoming Studies -->
+      <% const upcoming = studies.filter(s => s.status === 'scheduled' || s.status === 'in_progress'); %>
+      <% if (upcoming.length > 0) { %>
+      <div class="portal-section">
+        <h2 class="portal-section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Upcoming & In Progress
+        </h2>
+        <div class="portal-cards">
+          <% upcoming.forEach(s => { %>
+            <div class="portal-order-card pending">
+              <div class="order-card-header">
+                <span class="order-number"><%= s.study_id %></span>
+                <span class="order-status status-<%= s.status %>"><%= s.status.replace('_', ' ') %></span>
+              </div>
+              <div class="order-card-body">
+                <div class="mri-study-body-part"><%= s.body_part %> <%= s.modality %></div>
+                <div class="order-meta">
+                  <span>Contrast: <%= s.contrast %></span>
+                  <span>Scheduled: <%= s.scheduled_date ? new Date(s.scheduled_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD' %></span>
+                  <% if (s.ordering_physician) { %><span>Physician: <%= s.ordering_physician %></span><% } %>
+                </div>
+                <% if (s.clinical_indication) { %>
+                  <div class="mri-indication"><%= s.clinical_indication %></div>
+                <% } %>
+              </div>
+              <a href="/portal/mri/<%= s.id %>" class="order-card-link">View Details</a>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Completed Studies -->
+      <% const completed = studies.filter(s => s.status === 'completed'); %>
+      <% if (completed.length > 0) { %>
+      <div class="portal-section">
+        <h2 class="portal-section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Completed Studies
+        </h2>
+        <div class="portal-cards">
+          <% completed.forEach(s => { %>
+            <div class="portal-order-card completed">
+              <div class="order-card-header">
+                <span class="order-number"><%= s.study_id %></span>
+                <% if (s.report_status === 'final') { %>
+                  <span class="mri-badge mri-badge-report">Report Ready</span>
+                <% } else { %>
+                  <span class="order-status status-completed">Completed</span>
+                <% } %>
+              </div>
+              <div class="order-card-body">
+                <div class="mri-study-body-part"><%= s.body_part %> <%= s.modality %></div>
+                <div class="order-meta">
+                  <span>Contrast: <%= s.contrast %></span>
+                  <span>Performed: <%= s.performed_date ? new Date(s.performed_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '-' %></span>
+                  <% if (s.ordering_physician) { %><span>Physician: <%= s.ordering_physician %></span><% } %>
+                  <span><%= s.image_count %> image<%= s.image_count !== 1 ? 's' : '' %></span>
+                </div>
+              </div>
+              <div class="order-card-actions">
+                <a href="/portal/mri/<%= s.id %>" class="portal-btn portal-btn-sm portal-btn-primary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  View Report & Images
+                </a>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+    <% } %>
+
+    <div class="portal-back-link">
+      <a href="/portal" class="portal-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <footer class="portal-footer">
+    <p>&copy; <%= new Date().getFullYear() %> SimplyMRI Imaging Center. All rights reserved.</p>
+  </footer>
+</body>
+</html>

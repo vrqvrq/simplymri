@@ -79,7 +79,15 @@ router.get('/', requirePatient, (req, res) => {
     ORDER BY i.created_at DESC
   `).all(req.session.patient.id);
 
-  res.render('pages/portal/dashboard', { patient, recentResults, pendingOrders, completedOrders, unpaidInvoices });
+  const mriStudies = db.prepare(`
+    SELECT ms.*,
+      (SELECT report_status FROM mri_reports WHERE study_id = ms.id LIMIT 1) as report_status
+    FROM mri_studies ms
+    WHERE ms.patient_id = ?
+    ORDER BY ms.created_at DESC LIMIT 5
+  `).all(req.session.patient.id);
+
+  res.render('pages/portal/dashboard', { patient, recentResults, pendingOrders, completedOrders, unpaidInvoices, mriStudies });
 });
 
 // View order results
@@ -155,6 +163,52 @@ router.get('/invoices', requirePatient, (req, res) => {
 router.get('/profile', requirePatient, (req, res) => {
   const patient = db.prepare('SELECT * FROM patients WHERE id = ?').get(req.session.patient.id);
   res.render('pages/portal/profile', { patient });
+});
+
+// MRI Studies list
+router.get('/mri', requirePatient, (req, res) => {
+  const patient = db.prepare('SELECT * FROM patients WHERE id = ?').get(req.session.patient.id);
+
+  const studies = db.prepare(`
+    SELECT ms.*,
+      (SELECT COUNT(*) FROM mri_images WHERE study_id = ms.id) as image_count,
+      (SELECT report_status FROM mri_reports WHERE study_id = ms.id LIMIT 1) as report_status
+    FROM mri_studies ms
+    WHERE ms.patient_id = ?
+    ORDER BY ms.created_at DESC
+  `).all(req.session.patient.id);
+
+  res.render('pages/portal/mri-studies', { patient, studies });
+});
+
+// MRI Study detail with report and images
+router.get('/mri/:id', requirePatient, (req, res) => {
+  const patient = db.prepare('SELECT * FROM patients WHERE id = ?').get(req.session.patient.id);
+
+  const study = db.prepare(`
+    SELECT ms.* FROM mri_studies ms
+    WHERE ms.id = ? AND ms.patient_id = ?
+  `).get(req.params.id, req.session.patient.id);
+
+  if (!study) return res.status(404).send('Study not found');
+
+  const report = db.prepare(`
+    SELECT * FROM mri_reports WHERE study_id = ? AND report_status = 'final'
+  `).get(study.id);
+
+  const images = db.prepare(`
+    SELECT * FROM mri_images WHERE study_id = ? ORDER BY series_number, image_number
+  `).all(study.id);
+
+  // Group images by series
+  const series = {};
+  images.forEach(img => {
+    const key = `${img.series_number}-${img.series_description}`;
+    if (!series[key]) series[key] = { number: img.series_number, description: img.series_description, images: [] };
+    series[key].images.push(img);
+  });
+
+  res.render('pages/portal/mri-detail', { patient, study, report, images, series: Object.values(series) });
 });
 
 // Education

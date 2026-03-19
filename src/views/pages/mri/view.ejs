@@ -1,0 +1,96 @@
+<% const title = 'MRI Study ' + study.study_id %>
+<%- include('../../layouts/main', { body: `
+<div class="page-header">
+  <div>
+    <h1>${study.study_id} — ${study.body_part} ${study.modality}</h1>
+    <p>${study.first_name} ${study.last_name} (${study.pid}) | ${study.ordering_physician || 'No physician'}</p>
+  </div>
+  <a href="/mri" class="btn btn-outline">Back to Studies</a>
+</div>
+
+<div class="detail-grid">
+  <div class="detail-card">
+    <h3>Study Details</h3>
+    <table class="detail-table">
+      <tr><td>Study ID</td><td><strong>${study.study_id}</strong></td></tr>
+      <tr><td>Body Part</td><td>${study.body_part}</td></tr>
+      <tr><td>Modality</td><td>${study.modality}</td></tr>
+      <tr><td>Contrast</td><td>${study.contrast}</td></tr>
+      <tr><td>Priority</td><td><span class="badge badge-${study.priority === 'stat' ? 'error' : study.priority === 'urgent' ? 'warning' : 'info'}">${study.priority}</span></td></tr>
+      <tr><td>Status</td><td><span class="badge badge-${study.status === 'completed' ? 'success' : study.status === 'in_progress' ? 'warning' : 'info'}">${study.status}</span></td></tr>
+      <tr><td>Scheduled</td><td>${study.scheduled_date || '-'}</td></tr>
+      <tr><td>Performed</td><td>${study.performed_date || '-'}</td></tr>
+      <tr><td>Scanner</td><td>${study.scanner || '-'}</td></tr>
+      <tr><td>Indication</td><td>${study.clinical_indication || '-'}</td></tr>
+    </table>
+
+    <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+      ${study.status === 'scheduled' ? `
+        <form method="POST" action="/mri/${study.id}/status" style="display:inline"><input type="hidden" name="status" value="in_progress"><button class="btn btn-sm btn-warning">Start Exam</button></form>
+      ` : ''}
+      ${study.status === 'in_progress' ? `
+        <form method="POST" action="/mri/${study.id}/status" style="display:inline"><input type="hidden" name="status" value="completed"><button class="btn btn-sm btn-success">Mark Completed</button></form>
+      ` : ''}
+    </div>
+  </div>
+
+  <div class="detail-card">
+    <h3>Patient Info</h3>
+    <table class="detail-table">
+      <tr><td>Name</td><td>${study.first_name} ${study.last_name}</td></tr>
+      <tr><td>Patient ID</td><td>${study.pid}</td></tr>
+      <tr><td>DOB</td><td>${study.date_of_birth}</td></tr>
+      <tr><td>Gender</td><td>${study.gender}</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Images -->
+<div class="section-card" style="margin-top:24px">
+  <h3>Image Series (${images.length} images)</h3>
+  ${series.length > 0 ? series.map(s => `
+    <div style="margin-bottom:16px">
+      <h4 style="font-size:14px;color:#666;margin-bottom:8px">Series ${s.number}: ${s.description || 'Unnamed'} (${s.images.length} images, ${s.images[0].slice_thickness || '-'} slice)</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${s.images.map(img => `
+          <div style="padding:12px 16px;background:#f5f5f5;border-radius:8px;border:1px solid #e0e0e0;font-size:13px">
+            ${img.filename}<br><small style="color:#999">#${img.image_number}</small>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('') : '<p style="color:#888;padding:20px 0">No images uploaded yet</p>'}
+</div>
+
+<!-- Report -->
+<div class="section-card" style="margin-top:24px">
+  <h3>Radiology Report ${report ? `<span class="badge badge-${report.report_status === 'final' ? 'success' : 'warning'}" style="margin-left:8px">${report.report_status}</span>` : ''}</h3>
+
+  ${report && report.report_status === 'final' ? `
+    <div style="margin-bottom:20px">
+      ${report.technique ? `<div style="margin-bottom:16px"><h4 style="font-size:13px;color:#666;text-transform:uppercase;margin-bottom:6px">Technique</h4><p style="font-size:14px;line-height:1.6;white-space:pre-wrap">${report.technique}</p></div>` : ''}
+      ${report.comparison ? `<div style="margin-bottom:16px"><h4 style="font-size:13px;color:#666;text-transform:uppercase;margin-bottom:6px">Comparison</h4><p style="font-size:14px;line-height:1.6;white-space:pre-wrap">${report.comparison}</p></div>` : ''}
+      ${report.findings ? `<div style="margin-bottom:16px"><h4 style="font-size:13px;color:#666;text-transform:uppercase;margin-bottom:6px">Findings</h4><p style="font-size:14px;line-height:1.6;white-space:pre-wrap">${report.findings}</p></div>` : ''}
+      ${report.impression ? `<div style="margin-bottom:16px;padding:16px;background:#f0fdf4;border-radius:8px;border-left:4px solid #10b981"><h4 style="font-size:13px;color:#047857;text-transform:uppercase;margin-bottom:6px">Impression</h4><p style="font-size:14px;line-height:1.6;white-space:pre-wrap">${report.impression}</p></div>` : ''}
+      ${report.recommendations ? `<div style="margin-bottom:16px"><h4 style="font-size:13px;color:#666;text-transform:uppercase;margin-bottom:6px">Recommendations</h4><p style="font-size:14px;line-height:1.6;white-space:pre-wrap">${report.recommendations}</p></div>` : ''}
+      <p style="font-size:13px;color:#888;margin-top:16px">Reported by: ${report.radiologist || 'Unknown'} | ${report.reported_at || '-'}</p>
+    </div>
+  ` : ''}
+
+  <details ${!report || report.report_status !== 'final' ? 'open' : ''}>
+    <summary style="cursor:pointer;font-weight:600;margin-bottom:16px">${report ? 'Edit Report' : 'Create Report'}</summary>
+    <form method="POST" action="/mri/${study.id}/report">
+      <div class="form-group"><label>Technique</label><textarea name="technique" rows="3">${report ? report.technique || '' : ''}</textarea></div>
+      <div class="form-group"><label>Comparison</label><textarea name="comparison" rows="2">${report ? report.comparison || '' : ''}</textarea></div>
+      <div class="form-group"><label>Findings</label><textarea name="findings" rows="6">${report ? report.findings || '' : ''}</textarea></div>
+      <div class="form-group"><label>Impression</label><textarea name="impression" rows="4">${report ? report.impression || '' : ''}</textarea></div>
+      <div class="form-group"><label>Recommendations</label><textarea name="recommendations" rows="2">${report ? report.recommendations || '' : ''}</textarea></div>
+      <div class="form-group"><label>Radiologist</label><input type="text" name="radiologist" value="${report ? report.radiologist || '' : ''}" placeholder="Dr. Name, MD"></div>
+      <div class="form-actions">
+        <button type="submit" name="report_status" value="draft" class="btn btn-outline">Save Draft</button>
+        <button type="submit" name="report_status" value="final" class="btn btn-primary">Finalize Report</button>
+      </div>
+    </form>
+  </details>
+</div>
+` }) %>

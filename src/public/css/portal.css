@@ -1701,6 +1701,321 @@ a:hover { color: var(--p-primary-hover); }
 }
 
 /* ============================================================
+   MRI STUDIES
+   ============================================================ */
+.mri-study-body-part {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--p-text);
+  margin-bottom: 4px;
+}
+
+.mri-indication {
+  font-size: 13px;
+  color: var(--p-text-secondary);
+  line-height: 1.5;
+  margin-top: 6px;
+  padding: 10px 14px;
+  background: var(--p-border-light);
+  border-radius: var(--p-radius-xs);
+}
+
+.mri-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mri-badge-report {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.18));
+  color: #047857;
+}
+
+/* -- MRI Detail Header -- */
+.mri-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.mri-detail-header-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.mri-detail-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--p-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px var(--p-primary-glow);
+}
+
+.mri-detail-header-info h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+
+.mri-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--p-text-secondary);
+}
+
+/* -- MRI Info Row -- */
+.mri-info-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.mri-info-card {
+  background: var(--p-card);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius);
+  padding: 18px 22px;
+  box-shadow: var(--p-shadow-xs);
+}
+
+.mri-info-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--p-text-muted);
+  margin-bottom: 6px;
+}
+
+.mri-info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--p-text);
+}
+
+/* -- MRI Report -- */
+.mri-report-section {
+  border-left: 4px solid var(--p-success);
+}
+
+.mri-report-block {
+  margin-bottom: 24px;
+}
+
+.mri-report-block-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--p-primary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mri-report-block-text {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--p-text-secondary);
+  white-space: pre-wrap;
+}
+
+.mri-report-impression {
+  background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02));
+  border: 1px solid rgba(16,185,129,0.15);
+  border-left: 4px solid var(--p-success);
+  border-radius: var(--p-radius-sm);
+  padding: 22px 26px;
+}
+
+.mri-report-impression .mri-report-block-title {
+  color: #047857;
+}
+
+.mri-report-impression .mri-report-block-text {
+  color: var(--p-text);
+  font-weight: 500;
+}
+
+.mri-report-recommendations {
+  background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02));
+  border: 1px solid rgba(99,102,241,0.12);
+  border-left: 4px solid var(--p-primary);
+  border-radius: var(--p-radius-sm);
+  padding: 20px 24px;
+}
+
+.mri-report-recommendations .mri-report-block-title {
+  color: var(--p-primary);
+}
+
+.mri-report-signature {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 2px solid var(--p-border);
+}
+
+.mri-report-signature-line {
+  font-size: 15px;
+  color: var(--p-text);
+}
+
+.mri-report-signature-date {
+  font-size: 13px;
+  color: var(--p-text-muted);
+  margin-top: 4px;
+}
+
+/* -- MRI Series Grid -- */
+.mri-series-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mri-series-card {
+  background: var(--p-bg-elevated);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius);
+  padding: 22px;
+  transition: all var(--p-transition);
+}
+
+.mri-series-card:hover {
+  border-color: var(--p-border);
+  box-shadow: var(--p-shadow);
+}
+
+.mri-series-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.mri-series-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--p-primary-bg);
+  color: var(--p-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mri-series-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--p-text);
+}
+
+.mri-series-meta {
+  font-size: 13px;
+  color: var(--p-text-muted);
+  margin-top: 2px;
+}
+
+.mri-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.mri-image-tile {
+  border-radius: var(--p-radius-sm);
+  border: 1px solid var(--p-border);
+  overflow: hidden;
+  transition: all var(--p-transition);
+  cursor: default;
+}
+
+.mri-image-tile:hover {
+  border-color: var(--p-primary-light);
+  box-shadow: var(--p-shadow-md);
+  transform: translateY(-2px);
+}
+
+.mri-image-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.3);
+}
+
+.mri-image-label {
+  padding: 8px 10px;
+  background: var(--p-card);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mri-image-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--p-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mri-image-num {
+  font-size: 11px;
+  color: var(--p-text-muted);
+  flex-shrink: 0;
+}
+
+/* -- MRI Responsive -- */
+@media (max-width: 768px) {
+  .mri-info-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .mri-detail-header-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .mri-detail-meta {
+    justify-content: center;
+  }
+  .mri-image-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .mri-info-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
    PRINT
    ============================================================ */
 @media print {
