@@ -1958,6 +1958,25 @@ a:hover { color: var(--p-primary-hover); }
   transform: translateY(-2px);
 }
 
+.pacs-launch-btn {
+  padding: 14px 28px;
+  font-size: 15px;
+  box-shadow: 0 6px 24px rgba(99,102,241,0.35);
+}
+
+.pacs-launch-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 36px rgba(99,102,241,0.45);
+}
+
+.mri-pacs-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  gap: 16px;
+}
+
 .mri-image-placeholder {
   width: 100%;
   aspect-ratio: 1;
@@ -1966,6 +1985,27 @@ a:hover { color: var(--p-primary-hover); }
   align-items: center;
   justify-content: center;
   color: rgba(255,255,255,0.3);
+  position: relative;
+}
+
+.mri-image-play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  color: rgba(255,255,255,0.7);
+  opacity: 0;
+  transition: opacity var(--p-transition);
+}
+
+.mri-image-tile:hover .mri-image-play-overlay {
+  opacity: 1;
+}
+
+.mri-image-tile {
+  cursor: pointer;
 }
 
 .mri-image-label {

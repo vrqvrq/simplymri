@@ -127,4 +127,38 @@ router.post('/:id/report', requireAuth, (req, res) => {
   res.redirect(`/mri/${req.params.id}`);
 });
 
+// PACS Viewer for staff/doctors
+router.get('/:id/viewer', requireAuth, (req, res) => {
+  const study = db.prepare(`
+    SELECT ms.*, p.first_name, p.last_name, p.patient_id as pid, p.date_of_birth, p.gender
+    FROM mri_studies ms
+    JOIN patients p ON ms.patient_id = p.id
+    WHERE ms.id = ?
+  `).get(req.params.id);
+
+  if (!study) return res.status(404).send('Study not found');
+
+  const report = db.prepare('SELECT * FROM mri_reports WHERE study_id = ?').get(study.id);
+
+  const images = db.prepare(`
+    SELECT * FROM mri_images WHERE study_id = ? ORDER BY series_number, image_number
+  `).all(study.id);
+
+  const series = {};
+  images.forEach(img => {
+    const key = `${img.series_number}-${img.series_description}`;
+    if (!series[key]) series[key] = { number: img.series_number, description: img.series_description, images: [] };
+    series[key].images.push(img);
+  });
+
+  // For staff PACS, we pass patient info from the study join
+  const patient = {
+    first_name: study.first_name,
+    last_name: study.last_name,
+    patient_id: study.pid
+  };
+
+  res.render('pages/portal/pacs-viewer', { patient, study, report, images, series: Object.values(series) });
+});
+
 module.exports = router;

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PACS Viewer - <%= study.body_part %> <%= study.modality %> - SimplyMRI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/pacs.css">
+</head>
+<body>
+  <!-- PACS Top Bar -->
+  <div class="pacs-topbar">
+    <div class="pacs-topbar-left">
+      <a href="/portal/mri/<%= study.id %>" class="pacs-back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+      <div class="pacs-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+        SimplyPACS
+      </div>
+      <div class="pacs-divider"></div>
+      <div class="pacs-patient-info">
+        <span class="pacs-patient-name"><%= patient.last_name %>, <%= patient.first_name %></span>
+        <span class="pacs-patient-id"><%= patient.patient_id %></span>
+      </div>
+    </div>
+    <div class="pacs-topbar-center">
+      <span class="pacs-study-desc"><%= study.body_part %> <%= study.modality %> <%= study.contrast !== 'without' ? '(+C)' : '' %></span>
+      <span class="pacs-study-date"><%= study.performed_date || study.scheduled_date %></span>
+    </div>
+    <div class="pacs-topbar-right">
+      <span class="pacs-study-id"><%= study.study_id %></span>
+    </div>
+  </div>
+
+  <!-- PACS Toolbar -->
+  <div class="pacs-toolbar">
+    <div class="pacs-tool-group">
+      <button class="pacs-tool active" data-tool="scroll" title="Scroll through slices">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+        <span>Scroll</span>
+      </button>
+      <button class="pacs-tool" data-tool="zoom" title="Zoom">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        <span>Zoom</span>
+      </button>
+      <button class="pacs-tool" data-tool="pan" title="Pan">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>
+        <span>Pan</span>
+      </button>
+      <button class="pacs-tool" data-tool="window" title="Window/Level">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z"/></svg>
+        <span>W/L</span>
+      </button>
+    </div>
+    <div class="pacs-tool-group">
+      <button class="pacs-tool" data-tool="measure" title="Measure">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 22L22 2M15 3h6v6M3 21v-6"/></svg>
+        <span>Measure</span>
+      </button>
+      <button class="pacs-tool" data-tool="annotate" title="Annotate">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Annotate</span>
+      </button>
+    </div>
+    <div class="pacs-tool-group">
+      <button class="pacs-tool" onclick="resetView()" title="Reset View">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+        <span>Reset</span>
+      </button>
+      <button class="pacs-tool" onclick="toggleInvert()" title="Invert">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M12 2a10 10 0 0 0 0 20"/></svg>
+        <span>Invert</span>
+      </button>
+    </div>
+    <div class="pacs-tool-group pacs-layout-group">
+      <button class="pacs-tool active" data-layout="1x1" onclick="setLayout(1,1)" title="1x1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        <span>1x1</span>
+      </button>
+      <button class="pacs-tool" data-layout="1x2" onclick="setLayout(1,2)" title="1x2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+        <span>1x2</span>
+      </button>
+      <button class="pacs-tool" data-layout="2x2" onclick="setLayout(2,2)" title="2x2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        <span>2x2</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="pacs-main">
+    <!-- Series Panel -->
+    <div class="pacs-series-panel">
+      <div class="pacs-series-header">
+        <span>Series</span>
+        <span class="pacs-series-count"><%= series.length %></span>
+      </div>
+      <div class="pacs-series-list">
+        <% series.forEach((s, idx) => { %>
+          <div class="pacs-series-thumb <%= idx === 0 ? 'active' : '' %>" data-series="<%= idx %>" onclick="selectSeries(<%= idx %>)">
+            <div class="pacs-thumb-preview" data-series-idx="<%= idx %>">
+              <canvas width="80" height="80" class="pacs-thumb-canvas" data-type="<%= s.description %>"></canvas>
+            </div>
+            <div class="pacs-thumb-info">
+              <span class="pacs-thumb-name">S<%= s.number %>: <%= s.description %></span>
+              <span class="pacs-thumb-meta"><%= s.images.length %> img &middot; <%= s.images[0].slice_thickness || '-' %></span>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+      <% if (report) { %>
+      <div class="pacs-series-header" style="margin-top: 8px;">
+        <span>Report</span>
+      </div>
+      <div class="pacs-report-mini">
+        <div class="pacs-report-mini-label">Impression</div>
+        <div class="pacs-report-mini-text"><%= report.impression ? report.impression.substring(0, 200) + (report.impression.length > 200 ? '...' : '') : 'No impression' %></div>
+        <div class="pacs-report-mini-sign"><%= report.radiologist || '' %></div>
+      </div>
+      <% } %>
+    </div>
+
+    <!-- Viewport Area -->
+    <div class="pacs-viewport-area" id="viewportArea">
+      <div class="pacs-viewport active" id="viewport-0" data-viewport="0">
+        <!-- Overlay: Patient info (top-left) -->
+        <div class="pacs-overlay pacs-overlay-tl">
+          <span><%= patient.last_name %>, <%= patient.first_name %></span>
+          <span><%= patient.patient_id %></span>
+        </div>
+        <!-- Overlay: Study info (top-right) -->
+        <div class="pacs-overlay pacs-overlay-tr">
+          <span><%= study.body_part %> <%= study.modality %></span>
+          <span><%= study.performed_date || '' %></span>
+        </div>
+        <!-- Overlay: Series info (bottom-left) -->
+        <div class="pacs-overlay pacs-overlay-bl" id="seriesOverlay-0">
+          <span id="seriesName-0">-</span>
+          <span id="sliceInfo-0">-</span>
+        </div>
+        <!-- Overlay: Window/Level (bottom-right) -->
+        <div class="pacs-overlay pacs-overlay-br">
+          <span id="wlInfo-0">W: 400 L: 40</span>
+          <span id="zoomInfo-0">Zoom: 100%</span>
+        </div>
+        <!-- Canvas -->
+        <canvas class="pacs-canvas" id="canvas-0"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Bar -->
+  <div class="pacs-statusbar">
+    <div class="pacs-statusbar-left">
+      <span id="statusTool">Tool: Scroll</span>
+      <span class="pacs-status-sep">|</span>
+      <span id="statusPos">-</span>
+    </div>
+    <div class="pacs-statusbar-center">
+      <span id="statusSlice">Slice 1 / 1</span>
+    </div>
+    <div class="pacs-statusbar-right">
+      <span>SimplyPACS Viewer v1.0</span>
+    </div>
+  </div>
+
+  <script>
+    // ===== SERIES DATA =====
+    const seriesData = <%- JSON.stringify(series.map(s => ({
+      number: s.number,
+      description: s.description,
+      images: s.images.map(img => ({
+        id: img.id,
+        filename: img.filename,
+        series_description: img.series_description,
+        image_number: img.image_number,
+        slice_thickness: img.slice_thickness
+      }))
+    }))) %>;
+
+    const studyInfo = {
+      bodyPart: '<%= study.body_part %>',
+      modality: '<%= study.modality %>',
+      contrast: '<%= study.contrast %>'
+    };
+
+    // ===== STATE =====
+    let currentSeries = 0;
+    let currentSlice = 0;
+    let currentTool = 'scroll';
+    let zoom = 1;
+    let panX = 0, panY = 0;
+    let windowWidth = 400, windowLevel = 40;
+    let inverted = false;
+    let layoutCols = 1, layoutRows = 1;
+    let viewports = [{ series: 0, slice: 0 }];
+    let activeViewport = 0;
+    let isDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+
+    // ===== SIMULATED MRI RENDERING =====
+    function generateMRISlice(canvas, seriesIdx, sliceIdx, w, h, ww, wl, inv) {
+      const ctx = canvas.getContext('2d');
+      canvas.width = w;
+      canvas.height = h;
+
+      const series = seriesData[seriesIdx];
+      if (!series) return;
+
+      const desc = (series.description || '').toLowerCase();
+      const bodyPart = studyInfo.bodyPart.toLowerCase();
+      const totalSlices = series.images.length;
+      const sliceFrac = totalSlices > 1 ? sliceIdx / (totalSlices - 1) : 0.5;
+
+      // Create image data
+      const imgData = ctx.createImageData(w, h);
+      const data = imgData.data;
+      const cx = w / 2 + panX;
+      const cy = h / 2 + panY;
+      const scale = Math.min(w, h) * 0.4 * zoom;
+
+      // Seed for reproducible noise
+      let seed = seriesIdx * 1000 + sliceIdx * 100;
+      function rng() { seed = (seed * 16807 + 0) % 2147483647; return (seed - 1) / 2147483646; }
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          const dx = (x - cx) / scale;
+          const dy = (y - cy) / scale;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          let intensity = 0;
+
+          if (bodyPart.includes('brain')) {
+            // Brain cross section simulation
+            const skullR = 1.0;
+            const brainR = 0.85;
+            const ventR = 0.12 + sliceFrac * 0.08;
+
+            if (dist < skullR) {
+              // Skull ring (bright on T1, dark rim)
+              if (dist > brainR) {
+                intensity = desc.includes('t1') ? 200 : 120;
+                intensity += Math.sin(dist * 30) * 15;
+              }
+              // Brain parenchyma
+              else if (dist > ventR + 0.05) {
+                const grayMatter = dist > brainR * 0.7;
+                if (desc.includes('t1')) {
+                  intensity = grayMatter ? 130 : 160; // Gray darker than white on T1
+                } else if (desc.includes('t2') || desc.includes('flair')) {
+                  intensity = grayMatter ? 160 : 130; // Gray brighter on T2
+                } else {
+                  intensity = 140;
+                }
+                // Sulci pattern
+                const angle = Math.atan2(dy, dx);
+                intensity += Math.sin(angle * 8 + dist * 12) * 12 * (dist > brainR * 0.6 ? 1 : 0.3);
+                // Gyral pattern
+                intensity += Math.sin(dx * 15) * Math.cos(dy * 15) * 8;
+              }
+              // Ventricles (CSF)
+              else {
+                const vx = dx * 3;
+                const asymm = vx > 0 ? 1 : -1;
+                const vShape = Math.abs(vx * 1.5 + asymm * 0.03) + Math.abs(dy * 2.5);
+                if (vShape < ventR * 3) {
+                  intensity = desc.includes('t1') ? 30 : (desc.includes('flair') ? 30 : 220);
+                } else {
+                  intensity = desc.includes('t1') ? 155 : 135;
+                }
+              }
+              // Midline falx
+              if (Math.abs(dx) < 0.015 && dist < brainR) {
+                intensity = 180;
+              }
+            } else {
+              intensity = 0;
+            }
+          } else if (bodyPart.includes('spine') || bodyPart.includes('lumbar') || bodyPart.includes('cervical')) {
+            // Spine sagittal simulation
+            const bodyW = 0.5;
+            const bodyH = 1.2;
+            const spineX = 0;
+
+            if (Math.abs(dx - spineX) < bodyW && Math.abs(dy) < bodyH) {
+              // Vertebral bodies
+              const vertSeg = Math.floor((dy + bodyH) / (bodyH * 2 / 5));
+              const vertY = ((dy + bodyH) % (bodyH * 2 / 5)) / (bodyH * 2 / 5);
+              const inDisc = vertY > 0.75 && vertY < 0.9;
+
+              if (Math.abs(dx - spineX) < 0.15) {
+                if (inDisc) {
+                  // Disc - varies by T1/T2
+                  const discBulge = vertSeg === 3 ? 0.04 : 0; // Herniation at L4-L5
+                  intensity = desc.includes('t2') ? 180 - vertSeg * 12 : 100;
+                  if (vertSeg === 3 && desc.includes('t2')) intensity = 220; // Bright disc
+                } else {
+                  // Vertebral body
+                  intensity = desc.includes('t1') ? 170 : 110;
+                  intensity += Math.sin(vertY * 20) * 10;
+                }
+              }
+              // Spinal cord
+              if (Math.abs(dx - spineX) < 0.04 && Math.abs(dy) < bodyH * 0.9) {
+                intensity = desc.includes('t1') ? 140 : 130;
+              }
+              // CSF around cord
+              if (Math.abs(dx - spineX) < 0.07 && Math.abs(dx - spineX) > 0.04) {
+                intensity = desc.includes('t2') ? 220 : 40;
+              }
+              // Paraspinal tissue
+              if (Math.abs(dx - spineX) > 0.15 && Math.abs(dx - spineX) < bodyW) {
+                intensity = 80 + Math.sin(dy * 5 + dx * 8) * 20;
+              }
+            }
+          } else if (bodyPart.includes('knee')) {
+            // Knee sagittal simulation
+            const kneeR = 0.8;
+            if (dist < kneeR) {
+              // Femoral condyle (top)
+              const femurDist = Math.sqrt(dx * dx + (dy + 0.3) * (dy + 0.3));
+              // Tibial plateau (bottom)
+              const tibiaDist = Math.sqrt(dx * dx + (dy - 0.4) * (dy - 0.4));
+
+              if (femurDist < 0.35) {
+                intensity = desc.includes('t1') ? 180 : 100; // Bone marrow
+                intensity += Math.sin(femurDist * 20) * 15;
+                // Cortex
+                if (femurDist > 0.28 && femurDist < 0.35) intensity = 20;
+              } else if (tibiaDist < 0.3) {
+                intensity = desc.includes('t1') ? 170 : 95;
+                if (tibiaDist > 0.23 && tibiaDist < 0.3) intensity = 20;
+              }
+              // Joint space / meniscus
+              else if (Math.abs(dy - 0.05) < 0.12 && Math.abs(dx) < 0.35) {
+                // Meniscus (dark triangle)
+                if ((Math.abs(dx) > 0.12 && Math.abs(dx) < 0.3) && Math.abs(dy - 0.05) < 0.08) {
+                  intensity = 25; // Dark meniscus
+                  // Tear - bright line in meniscus
+                  if (dx > 0.15 && Math.abs(dy - 0.03) < 0.02 && sliceFrac > 0.3) {
+                    intensity = desc.includes('t2') || desc.includes('pd') ? 200 : 25;
+                  }
+                } else {
+                  intensity = desc.includes('t2') || desc.includes('pd') ? 180 : 120; // Joint fluid
+                }
+              }
+              // Soft tissue
+              else if (dist < kneeR) {
+                intensity = 60 + Math.sin(dx * 10 + dy * 10) * 15;
+                // ACL/PCL area
+                if (Math.abs(dx) < 0.06 && dy > -0.2 && dy < 0.2) {
+                  intensity = 30; // Ligament (dark)
+                }
+              }
+            }
+          } else {
+            // Generic cross section
+            if (dist < 1.0) {
+              intensity = 100 + Math.sin(dx * 10) * 20 + Math.cos(dy * 10) * 20;
+              if (dist < 0.3) intensity = 160;
+              if (dist > 0.8) intensity = 60;
+            }
+          }
+
+          // Tissue noise
+          if (intensity > 0) {
+            intensity += (rng() - 0.5) * 18;
+          }
+
+          // Apply window/level
+          let mapped = ((intensity - (wl - ww / 2)) / ww) * 255;
+          mapped = Math.max(0, Math.min(255, mapped));
+          if (inv) mapped = 255 - mapped;
+
+          data[idx] = mapped;
+          data[idx + 1] = mapped;
+          data[idx + 2] = mapped;
+          data[idx + 3] = 255;
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+    }
+
+    // ===== RENDER VIEWPORT =====
+    function renderViewport(vpIdx) {
+      const vp = viewports[vpIdx];
+      if (!vp) return;
+
+      const canvas = document.getElementById(`canvas-${vpIdx}`);
+      if (!canvas) return;
+
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const w = Math.floor(rect.width);
+      const h = Math.floor(rect.height - 2); // minus overlay padding
+
+      generateMRISlice(canvas, vp.series, vp.slice, w, h, windowWidth, windowLevel, inverted);
+
+      // Update overlays
+      const series = seriesData[vp.series];
+      const nameEl = document.getElementById(`seriesName-${vpIdx}`);
+      const sliceEl = document.getElementById(`sliceInfo-${vpIdx}`);
+      const wlEl = document.getElementById(`wlInfo-${vpIdx}`);
+      const zoomEl = document.getElementById(`zoomInfo-${vpIdx}`);
+
+      if (nameEl && series) nameEl.textContent = `S${series.number}: ${series.description}`;
+      if (sliceEl && series) sliceEl.textContent = `Im: ${vp.slice + 1}/${series.images.length} Thk: ${series.images[0]?.slice_thickness || '-'}`;
+      if (wlEl) wlEl.textContent = `W: ${windowWidth} L: ${windowLevel}`;
+      if (zoomEl) zoomEl.textContent = `Zoom: ${Math.round(zoom * 100)}%`;
+
+      // Status bar
+      if (vpIdx === activeViewport) {
+        document.getElementById('statusSlice').textContent = series ? `Slice ${vp.slice + 1} / ${series.images.length}` : '-';
+      }
+    }
+
+    function renderAll() {
+      viewports.forEach((_, i) => renderViewport(i));
+    }
+
+    // ===== SERIES SELECTION =====
+    function selectSeries(idx) {
+      document.querySelectorAll('.pacs-series-thumb').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll(`.pacs-series-thumb[data-series="${idx}"]`).forEach(el => el.classList.add('active'));
+      viewports[activeViewport] = { series: idx, slice: 0 };
+      currentSeries = idx;
+      currentSlice = 0;
+      zoom = 1; panX = 0; panY = 0;
+      renderAll();
+    }
+
+    // ===== TOOLS =====
+    document.querySelectorAll('.pacs-tool[data-tool]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.pacs-tool[data-tool]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTool = btn.dataset.tool;
+        document.getElementById('statusTool').textContent = `Tool: ${btn.querySelector('span').textContent}`;
+      });
+    });
+
+    function resetView() {
+      zoom = 1; panX = 0; panY = 0;
+      windowWidth = 400; windowLevel = 40;
+      inverted = false;
+      renderAll();
+    }
+
+    function toggleInvert() {
+      inverted = !inverted;
+      renderAll();
+    }
+
+    // ===== LAYOUT =====
+    function setLayout(rows, cols) {
+      layoutRows = rows;
+      layoutCols = cols;
+
+      document.querySelectorAll('.pacs-tool[data-layout]').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.pacs-tool[data-layout="${rows}x${cols}"]`)?.classList.add('active');
+
+      const area = document.getElementById('viewportArea');
+      area.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      area.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+
+      const total = rows * cols;
+      // Remove extra viewports
+      while (area.children.length > total) area.removeChild(area.lastChild);
+      // Add needed viewports
+      while (area.children.length < total) {
+        const idx = area.children.length;
+        const vp = document.createElement('div');
+        vp.className = 'pacs-viewport';
+        vp.id = `viewport-${idx}`;
+        vp.dataset.viewport = idx;
+        vp.innerHTML = `
+          <div class="pacs-overlay pacs-overlay-bl" id="seriesOverlay-${idx}">
+            <span id="seriesName-${idx}">-</span>
+            <span id="sliceInfo-${idx}">-</span>
+          </div>
+          <div class="pacs-overlay pacs-overlay-br">
+            <span id="wlInfo-${idx}">W: 400 L: 40</span>
+            <span id="zoomInfo-${idx}">Zoom: 100%</span>
+          </div>
+          <canvas class="pacs-canvas" id="canvas-${idx}"></canvas>
+        `;
+        area.appendChild(vp);
+        // Assign next series
+        const seriesIdx = Math.min(idx, seriesData.length - 1);
+        viewports[idx] = { series: seriesIdx, slice: 0 };
+        setupViewportEvents(vp, idx);
+      }
+
+      // Ensure viewports array matches
+      viewports = viewports.slice(0, total);
+      while (viewports.length < total) {
+        viewports.push({ series: Math.min(viewports.length, seriesData.length - 1), slice: 0 });
+      }
+
+      // Set active
+      document.querySelectorAll('.pacs-viewport').forEach(v => v.classList.remove('active'));
+      if (activeViewport >= total) activeViewport = 0;
+      document.getElementById(`viewport-${activeViewport}`)?.classList.add('active');
+
+      setTimeout(renderAll, 50);
+    }
+
+    // ===== VIEWPORT INTERACTION =====
+    function setupViewportEvents(vpEl, idx) {
+      vpEl.addEventListener('mousedown', (e) => {
+        // Set active viewport
+        activeViewport = idx;
+        document.querySelectorAll('.pacs-viewport').forEach(v => v.classList.remove('active'));
+        vpEl.classList.add('active');
+
+        isDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        e.preventDefault();
+      });
+
+      vpEl.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        activeViewport = idx;
+        const vp = viewports[idx];
+        const series = seriesData[vp.series];
+        if (!series) return;
+
+        if (currentTool === 'zoom') {
+          zoom += e.deltaY > 0 ? -0.1 : 0.1;
+          zoom = Math.max(0.2, Math.min(5, zoom));
+        } else {
+          // Scroll slices
+          vp.slice += e.deltaY > 0 ? 1 : -1;
+          vp.slice = Math.max(0, Math.min(series.images.length - 1, vp.slice));
+        }
+        renderAll();
+      });
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+
+      const vp = viewports[activeViewport];
+      const series = seriesData[vp?.series];
+
+      if (currentTool === 'pan') {
+        panX += dx;
+        panY += dy;
+      } else if (currentTool === 'zoom') {
+        zoom += dy * -0.005;
+        zoom = Math.max(0.2, Math.min(5, zoom));
+      } else if (currentTool === 'window') {
+        windowWidth = Math.max(1, windowWidth + dx * 2);
+        windowLevel = Math.max(-1000, Math.min(2000, windowLevel + dy * 2));
+      } else if (currentTool === 'scroll' && series) {
+        const delta = Math.sign(dy);
+        if (Math.abs(dy) > 3) {
+          vp.slice += delta;
+          vp.slice = Math.max(0, Math.min(series.images.length - 1, vp.slice));
+        }
+      }
+
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+
+      renderAll();
+
+      // Update mouse position display
+      const canvas = document.getElementById(`canvas-${activeViewport}`);
+      if (canvas) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = Math.round(e.clientX - rect.left);
+        const my = Math.round(e.clientY - rect.top);
+        document.getElementById('statusPos').textContent = `(${mx}, ${my})`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // ===== KEYBOARD =====
+    document.addEventListener('keydown', (e) => {
+      const vp = viewports[activeViewport];
+      const series = seriesData[vp?.series];
+      if (!series) return;
+
+      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        vp.slice = Math.max(0, vp.slice - 1);
+        renderAll();
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        vp.slice = Math.min(series.images.length - 1, vp.slice + 1);
+        renderAll();
+      } else if (e.key === 'r') {
+        resetView();
+      } else if (e.key === 'i') {
+        toggleInvert();
+      }
+    });
+
+    // ===== THUMBNAILS =====
+    function renderThumbnails() {
+      document.querySelectorAll('.pacs-thumb-canvas').forEach(canvas => {
+        const desc = canvas.dataset.type || '';
+        const idx = parseInt(canvas.closest('.pacs-series-thumb')?.dataset.series || '0');
+        const tmpZoom = zoom, tmpPanX = panX, tmpPanY = panY;
+        zoom = 1; panX = 0; panY = 0;
+        generateMRISlice(canvas, idx, 0, 80, 80, 400, 40, false);
+        zoom = tmpZoom; panX = tmpPanX; panY = tmpPanY;
+      });
+    }
+
+    // ===== INIT =====
+    setupViewportEvents(document.getElementById('viewport-0'), 0);
+
+    window.addEventListener('resize', () => { setTimeout(renderAll, 100); });
+
+    // Initial render
+    setTimeout(() => {
+      renderThumbnails();
+      if (seriesData.length > 0) {
+        viewports[0] = { series: 0, slice: 0 };
+      }
+      renderAll();
+    }, 100);
+  </script>
+</body>
+</html>

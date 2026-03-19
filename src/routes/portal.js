@@ -211,6 +211,35 @@ router.get('/mri/:id', requirePatient, (req, res) => {
   res.render('pages/portal/mri-detail', { patient, study, report, images, series: Object.values(series) });
 });
 
+// PACS Viewer for patient
+router.get('/mri/:id/viewer', requirePatient, (req, res) => {
+  const patient = db.prepare('SELECT * FROM patients WHERE id = ?').get(req.session.patient.id);
+
+  const study = db.prepare(`
+    SELECT ms.* FROM mri_studies ms
+    WHERE ms.id = ? AND ms.patient_id = ?
+  `).get(req.params.id, req.session.patient.id);
+
+  if (!study) return res.status(404).send('Study not found');
+
+  const report = db.prepare(`
+    SELECT * FROM mri_reports WHERE study_id = ? AND report_status = 'final'
+  `).get(study.id);
+
+  const images = db.prepare(`
+    SELECT * FROM mri_images WHERE study_id = ? ORDER BY series_number, image_number
+  `).all(study.id);
+
+  const series = {};
+  images.forEach(img => {
+    const key = `${img.series_number}-${img.series_description}`;
+    if (!series[key]) series[key] = { number: img.series_number, description: img.series_description, images: [] };
+    series[key].images.push(img);
+  });
+
+  res.render('pages/portal/pacs-viewer', { patient, study, report, images, series: Object.values(series) });
+});
+
 // Education
 router.get('/education', requirePatient, (req, res) => {
   // Fetch unique test categories and tests the patient has had
