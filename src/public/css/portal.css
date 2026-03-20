@@ -2088,3 +2088,290 @@ a:hover { color: var(--p-primary-hover); }
    SELECTION
    ============================================================ */
 ::selection { background: var(--p-primary-bg); color: var(--p-primary); }
+
+/* ============================================================
+   AI IMAGE INTERPRETATION
+   ============================================================ */
+.ai-interpret-section { position: relative; }
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.ai-disclaimer {
+  font-size: 13px;
+  color: var(--p-text-secondary);
+  background: var(--p-warning-bg);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--p-radius-xs);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.ai-content-area { min-height: 60px; }
+
+.ai-load-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  padding: 12px 24px;
+}
+
+.ai-load-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.ai-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: aiSpin 0.7s linear infinite;
+}
+
+@keyframes aiSpin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-error {
+  color: var(--p-danger);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* AI Blocks */
+.ai-block {
+  display: flex;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--p-border-light);
+}
+
+.ai-block:first-child { padding-top: 0; }
+.ai-block:last-of-type { border-bottom: none; }
+
+.ai-block-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--p-primary-bg);
+  border-radius: var(--p-radius-xs);
+  color: var(--p-primary);
+}
+
+.ai-block-content { flex: 1; min-width: 0; }
+
+.ai-block-content h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--p-text);
+  margin-bottom: 8px;
+}
+
+.ai-block-content p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--p-text-secondary);
+}
+
+.ai-sub {
+  margin-top: 6px;
+  font-size: 13px !important;
+  color: var(--p-text-muted) !important;
+}
+
+/* Techniques */
+.ai-techniques { display: flex; flex-direction: column; gap: 8px; }
+
+.ai-technique-card {
+  background: var(--p-bg-elevated);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius-xs);
+  padding: 12px 14px;
+}
+
+.ai-technique-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.ai-technique-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--p-text);
+}
+
+.ai-technique-meta {
+  font-size: 12px;
+  color: var(--p-text-muted);
+}
+
+.ai-technique-card p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--p-text-secondary);
+}
+
+/* Anatomy Guide */
+.ai-anatomy-list { display: flex; flex-direction: column; gap: 10px; }
+
+.ai-anatomy-item {
+  padding: 10px 14px;
+  background: var(--p-bg-elevated);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius-xs);
+}
+
+.ai-anatomy-item strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--p-primary);
+  margin-bottom: 4px;
+}
+
+.ai-anatomy-item p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* Findings */
+.ai-findings-list { display: flex; flex-direction: column; gap: 10px; }
+
+.ai-finding-item {
+  padding: 12px 14px;
+  background: var(--p-bg-elevated);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius-xs);
+}
+
+.ai-finding-simplified {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--p-text);
+  font-weight: 500;
+}
+
+.ai-finding-original {
+  margin-top: 8px;
+}
+
+.ai-finding-original summary {
+  font-size: 12px;
+  color: var(--p-text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ai-finding-original summary:hover { color: var(--p-primary); }
+
+.ai-finding-original p {
+  font-size: 12px;
+  color: var(--p-text-muted);
+  font-style: italic;
+  margin-top: 4px;
+  padding-left: 12px;
+  border-left: 2px solid var(--p-border);
+}
+
+/* Meaning block */
+.ai-meaning .ai-block-icon {
+  background: var(--p-success-bg);
+  color: var(--p-success);
+}
+
+.ai-meaning .ai-block-content h3 { color: #047857; }
+
+/* Next Steps block */
+.ai-nextsteps .ai-block-icon {
+  background: rgba(99, 102, 241, 0.06);
+  color: var(--p-primary);
+}
+
+/* FAQ */
+.ai-faq-list { display: flex; flex-direction: column; gap: 6px; }
+
+.ai-faq-item {
+  background: var(--p-bg-elevated);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius-xs);
+  padding: 0;
+}
+
+.ai-faq-item summary {
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--p-text);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-faq-item summary::before {
+  content: '+';
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--p-primary);
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.ai-faq-item[open] summary::before {
+  content: '−';
+}
+
+.ai-faq-item summary:hover { color: var(--p-primary); }
+
+.ai-faq-item p {
+  padding: 0 14px 14px 42px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--p-text-secondary);
+}
+
+/* Footer disclaimer */
+.ai-footer-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: var(--p-bg-elevated);
+  border: 1px solid var(--p-border-light);
+  border-radius: var(--p-radius-xs);
+  font-size: 12px;
+  color: var(--p-text-muted);
+  line-height: 1.5;
+}
+
+.ai-footer-disclaimer svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}

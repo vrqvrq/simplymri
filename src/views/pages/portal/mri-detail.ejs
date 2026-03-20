@@ -213,6 +213,24 @@
     </div>
     <% } %>
 
+    <!-- AI Image Interpretation -->
+    <div class="portal-section ai-interpret-section">
+      <h2 class="portal-section-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a2 2 0 0 1 2-2V6a4 4 0 0 1 4-4z"/><path d="M8 14v2a4 4 0 0 0 8 0v-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        AI Image Guide
+        <span class="ai-badge">AI-Powered</span>
+      </h2>
+      <p class="ai-disclaimer">
+        This AI-generated guide helps you understand your MRI images in plain language. It is <strong>not a diagnosis</strong> — always discuss your results with your doctor.
+      </p>
+      <div id="aiInterpretation" class="ai-content-area">
+        <button id="aiLoadBtn" class="portal-btn portal-btn-primary ai-load-btn" onclick="loadAIInterpretation()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a2 2 0 0 1 2-2V6a4 4 0 0 1 4-4z"/><path d="M8 14v2a4 4 0 0 0 8 0v-2"/></svg>
+          Generate Plain-Language Explanation
+        </button>
+      </div>
+    </div>
+
     <% if (study.notes) { %>
     <div class="portal-section">
       <h2 class="portal-section-title">
@@ -236,5 +254,180 @@
   <footer class="portal-footer">
     <p>&copy; <%= new Date().getFullYear() %> SimplyMRI Imaging Center. All rights reserved.</p>
   </footer>
+
+  <script>
+    let aiLoaded = false;
+
+    async function loadAIInterpretation() {
+      if (aiLoaded) return;
+
+      const container = document.getElementById('aiInterpretation');
+      const btn = document.getElementById('aiLoadBtn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="ai-spinner"></span> Analyzing your images...';
+
+      try {
+        const resp = await fetch('/portal/mri/<%= study.id %>/ai-interpret', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question: 'general' })
+        });
+
+        if (!resp.ok) throw new Error('Failed to load interpretation');
+        const data = await resp.json();
+        aiLoaded = true;
+        renderAIInterpretation(container, data);
+      } catch (err) {
+        btn.disabled = false;
+        btn.innerHTML = 'Try Again';
+        container.insertAdjacentHTML('beforeend', '<p class="ai-error">Unable to generate interpretation. Please try again.</p>');
+      }
+    }
+
+    function renderAIInterpretation(container, data) {
+      let html = '';
+
+      // Study Overview
+      html += `
+        <div class="ai-block ai-overview">
+          <div class="ai-block-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div class="ai-block-content">
+            <h3>About Your Scan</h3>
+            <p>${data.studyOverview}</p>
+            <p class="ai-sub">${data.whatWeScanned}</p>
+          </div>
+        </div>`;
+
+      // Imaging Techniques
+      if (data.imagingTechniques && data.imagingTechniques.length > 0) {
+        html += `
+          <div class="ai-block">
+            <div class="ai-block-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
+            </div>
+            <div class="ai-block-content">
+              <h3>Image Series Explained</h3>
+              <div class="ai-techniques">
+                ${data.imagingTechniques.map(t => `
+                  <div class="ai-technique-card">
+                    <div class="ai-technique-header">
+                      <span class="ai-technique-name">${t.name}</span>
+                      <span class="ai-technique-meta">${t.imageCount} images &middot; ${t.orientation}</span>
+                    </div>
+                    <p>${t.explanation}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // Anatomy Guide
+      if (data.anatomyGuide && data.anatomyGuide.length > 0) {
+        html += `
+          <div class="ai-block">
+            <div class="ai-block-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="ai-block-content">
+              <h3>Anatomy Guide — What You're Looking At</h3>
+              <div class="ai-anatomy-list">
+                ${data.anatomyGuide.map(a => `
+                  <div class="ai-anatomy-item">
+                    <strong>${a.structure}</strong>
+                    <p>${a.description}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // Findings (if report exists)
+      if (data.findings && data.findings.length > 0) {
+        html += `
+          <div class="ai-block ai-findings">
+            <div class="ai-block-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="ai-block-content">
+              <h3>Findings — In Plain Language</h3>
+              <div class="ai-findings-list">
+                ${data.findings.map(f => `
+                  <div class="ai-finding-item">
+                    <div class="ai-finding-simplified">${f.simplified}</div>
+                    <details class="ai-finding-original">
+                      <summary>See medical terminology</summary>
+                      <p>${f.original}</p>
+                    </details>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // What This Means
+      if (data.whatThisMeans) {
+        html += `
+          <div class="ai-block ai-meaning">
+            <div class="ai-block-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="ai-block-content">
+              <h3>What This Means For You</h3>
+              <p>${data.whatThisMeans}</p>
+            </div>
+          </div>`;
+      }
+
+      // Next Steps
+      if (data.nextSteps) {
+        html += `
+          <div class="ai-block ai-nextsteps">
+            <div class="ai-block-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="ai-block-content">
+              <h3>Recommended Next Steps</h3>
+              <p>${data.nextSteps}</p>
+            </div>
+          </div>`;
+      }
+
+      // FAQ
+      if (data.faq && data.faq.length > 0) {
+        html += `
+          <div class="ai-block ai-faq">
+            <div class="ai-block-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="ai-block-content">
+              <h3>Frequently Asked Questions</h3>
+              <div class="ai-faq-list">
+                ${data.faq.map(f => `
+                  <details class="ai-faq-item">
+                    <summary>${f.q}</summary>
+                    <p>${f.a}</p>
+                  </details>
+                `).join('')}
+              </div>
+            </div>
+          </div>`;
+      }
+
+      // Disclaimer footer
+      html += `
+        <div class="ai-footer-disclaimer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          This AI-generated explanation is for educational purposes only. It is not a medical diagnosis or substitute for professional medical advice. Always consult your healthcare provider.
+        </div>`;
+
+      container.innerHTML = html;
+    }
+  </script>
 </body>
 </html>
