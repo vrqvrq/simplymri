@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimplyMRI — Coming Soon</title>
+  <meta name="description" content="SimplyMRI Imaging Center — Advanced MRI diagnostics with AI-powered image interpretation. Launching soon.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4338ca;
+      --accent: #8b5cf6;
+      --bg: #0a0a1a;
+      --card: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --glow: rgba(99,102,241,0.15);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Animated gradient background */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(139,92,246,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 20% 90%, rgba(99,102,241,0.06) 0%, transparent 50%);
+      animation: bgPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgPulse {
+      0% { opacity: 0.8; }
+      100% { opacity: 1; }
+    }
+
+    /* Grid pattern overlay */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* Main content */
+    .main {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px var(--glow), 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .logo-icon svg {
+      width: 28px;
+      height: 28px;
+      color: #fff;
+    }
+
+    .logo-text {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 0%, #c7d2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Hero */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-badge .pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+      max-width: 700px;
+    }
+
+    h1 .gradient {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent) 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      line-height: 1.6;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin-bottom: 40px;
+    }
+
+    /* Feature pills */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 48px;
+      max-width: 600px;
+    }
+
+    .feature-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      backdrop-filter: blur(8px);
+    }
+
+    .feature-pill svg {
+      width: 16px;
+      height: 16px;
+      color: var(--primary-light);
+      flex-shrink: 0;
+    }
+
+    /* Notification signup */
+    .notify-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 480px;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 60px rgba(99,102,241,0.05);
+    }
+
+    .notify-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .notify-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .notify-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .notify-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .notify-form input::placeholder { color: var(--text-muted); }
+
+    .notify-form input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--glow);
+    }
+
+    .notify-form button {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+
+    .notify-form button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px var(--glow);
+    }
+
+    .notify-success {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 12px;
+      color: #10b981;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* MRI scan animation */
+    .scan-visual {
+      margin-top: 60px;
+      position: relative;
+      width: 280px;
+      height: 280px;
+    }
+
+    .scan-ring {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(99,102,241,0.15);
+      border-radius: 50%;
+    }
+
+    .scan-ring:nth-child(2) {
+      inset: 20px;
+      border-color: rgba(99,102,241,0.1);
+      animation: scanRotate 12s linear infinite;
+    }
+
+    .scan-ring:nth-child(3) {
+      inset: 40px;
+      border-color: rgba(99,102,241,0.08);
+      animation: scanRotate 8s linear infinite reverse;
+    }
+
+    .scan-ring::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      width: 8px;
+      height: 8px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--primary-light);
+    }
+
+    @keyframes scanRotate {
+      to { transform: rotate(360deg); }
+    }
+
+    .scan-center {
+      position: absolute;
+      inset: 60px;
+      background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scan-center svg {
+      width: 64px;
+      height: 64px;
+      color: rgba(99,102,241,0.3);
+    }
+
+    /* Contact info */
+    .contact {
+      margin-top: 48px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .contact a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .contact a:hover { color: var(--primary-light); }
+
+    .contact svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+    }
+
+    /* Responsive */
+    @media (max-width: 540px) {
+      .notify-form { flex-direction: column; }
+      .notify-form button { width: 100%; }
+      .scan-visual { width: 200px; height: 200px; }
+      .scan-ring:nth-child(2) { inset: 14px; }
+      .scan-ring:nth-child(3) { inset: 28px; }
+      .scan-center { inset: 42px; }
+      .scan-center svg { width: 48px; height: 48px; }
+      .features { gap: 8px; }
+      .feature-pill { font-size: 13px; padding: 8px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <div class="main">
+    <!-- Logo -->
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+      </div>
+      <span class="logo-text">SimplyMRI</span>
+    </div>
+
+    <!-- Badge -->
+    <div class="hero-badge">
+      <span class="pulse"></span>
+      Under Construction
+    </div>
+
+    <!-- Headline -->
+    <h1>Advanced MRI<br><span class="gradient">Reimagined</span></h1>
+    <p class="hero-sub">We're building a new experience for patients and providers. AI-powered image interpretation, seamless portal access, and modern diagnostics — all coming soon.</p>
+
+    <!-- Features -->
+    <div class="features">
+      <div class="feature-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        PACS Viewer
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V9a2 2 0 0 1 2-2V6a4 4 0 0 1 4-4z"/><path d="M8 14v2a4 4 0 0 0 8 0v-2"/></svg>
+        AI Interpretation
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Patient Portal
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Digital Reports
+      </div>
+      <div class="feature-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secure & Private
+      </div>
+    </div>
+
+    <!-- Notify -->
+    <div class="notify-card">
+      <h3>Get Notified When We Launch</h3>
+      <p>Be the first to know when SimplyMRI goes live. No spam, just one announcement.</p>
+      <form class="notify-form" id="notifyForm" onsubmit="handleNotify(event)">
+        <input type="email" placeholder="your@email.com" required id="notifyEmail" autocomplete="email">
+        <button type="submit">Notify Me</button>
+      </form>
+      <div class="notify-success" id="notifySuccess">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        You're on the list! We'll be in touch.
+      </div>
+    </div>
+
+    <!-- Scan Visual -->
+    <div class="scan-visual">
+      <div class="scan-ring"></div>
+      <div class="scan-ring"></div>
+      <div class="scan-ring"></div>
+      <div class="scan-center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M2 12h4M18 12h4M12 2v4M12 18v4"/></svg>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="contact">
+      <a href="mailto:info@simplymri.ca">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        info@simplymri.ca
+      </a>
+      <a href="tel:+1-000-000-0000">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Contact Us
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 SimplyMRI Imaging Center. All rights reserved.
+  </footer>
+
+  <script>
+    function handleNotify(e) {
+      e.preventDefault();
+      const email = document.getElementById('notifyEmail').value;
+      // Store in localStorage as a simple demo — replace with real backend/Webflow form
+      const emails = JSON.parse(localStorage.getItem('simplymri_notify') || '[]');
+      emails.push({ email, date: new Date().toISOString() });
+      localStorage.setItem('simplymri_notify', JSON.stringify(emails));
+
+      document.getElementById('notifyForm').style.display = 'none';
+      document.getElementById('notifySuccess').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
